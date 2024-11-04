@@ -9,6 +9,6 @@ class Mouse():
         pos = pygame.mouse.get_pos()
         for row in self.board:
             for piece in row:
-                if piece != 0 and piece.is_clicked(pos):
+                if piece != 0:
                     piece.clicked(pos)
     
