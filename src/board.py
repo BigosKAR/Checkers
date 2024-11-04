@@ -12,6 +12,7 @@ class Board():
         self.selected_piece = None
         self.add_pieces()
 
+    # FUNCTIONS FOR INITIALIZING THE BOARD
 
     def draw_board(self, window) -> None:
         for row in range(ROWS):
