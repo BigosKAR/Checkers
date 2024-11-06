@@ -19,7 +19,11 @@ def main():
                 # DOES THIS IF THE PLAYER CLICKS
                 # GETS POSITION, CHECKS FOR PIECE SELECTION/MOVE
                 pos = pygame.mouse.get_pos()
-                game.select(pos)
+                if pos[1] < (HEIGHT - BUTTON_HUD_HEIGHT):
+                    game.select(pos)
+                else:
+                    # Functionality of buttons for the lower section
+                    pass
         game.board.draw(window)  # drawing the board
         
         pygame.display.update() # updating the display

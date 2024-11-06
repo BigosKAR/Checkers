@@ -25,7 +25,7 @@ class Game():
     # Function turns coordinates from get_pos() and turns into row and column number
     def coords_to_row_col(self, pos):
         x, y = pos
-        if 0 <= y < HEIGHT and 0 <= x < WIDTH:
+        if 0 <= y < (HEIGHT-BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
             row = y // CELL_SIZE
             column = x // CELL_SIZE
             return row, column
