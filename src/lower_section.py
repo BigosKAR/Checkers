@@ -21,6 +21,7 @@ class LowerSection():
         self.window = window
         self.color = color
         self.buttons = []
+        self.initialize_lower_section(DIM_GRAY)
 
 
     # Draws the lower section with buttons

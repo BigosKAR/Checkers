@@ -1,19 +1,13 @@
 import pygame
-from board import Board
 from constants import *
-from lower_section import LowerSection, Button
-from mouse import Mouse
+from game import Game
 
 # creating the window of the application
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def main():
     # Initializing parts of the game (board and the section below it)
-    board = Board()
-    lower_section = LowerSection(window, SILVER)
-    lower_section.initialize_lower_section(DIM_GRAY)
-    mouse = Mouse(board.board)
-
+    game = Game(window)
     clock = pygame.time.Clock()
     active = True
     while active:
@@ -22,8 +16,11 @@ def main():
             if event.type == pygame.QUIT:
                 active = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse.check_if_piece_clicked()
-        board.draw(window)  # drawing the board
+                # DOES THIS IF THE PLAYER CLICKS
+                # GETS POSITION, CHECKS FOR PIECE SELECTION/MOVE
+                pos = pygame.mouse.get_pos()
+                game.select(pos)
+        game.board.draw(window)  # drawing the board
         
         pygame.display.update() # updating the display
 
