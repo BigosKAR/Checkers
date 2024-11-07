@@ -49,4 +49,18 @@ class Board():
                 piece = self.board[row][column]
                 if piece != 0:
                     piece.draw(window)
+
+
+    # MOVEMENT FUNCTIONS
+
+    # Functions for moving pieces in a 2D array and changing the piece's attributes
+    # Changes the king attribute for a piece if it meets the condition
+    def move(self, new_row, new_column):
+        if not (0 <= new_row <= 7 and 0 <= new_column <= 7):
+            self.selected_piece = None
+            return
+        if (new_row == 7 and self.selected_piece.color == WHITE) or (new_row == 0 and self.selected_piece.color == RED):
+            self.selected_piece.king_promotion()
+        self.board[self.selected_piece.row][self.selected_piece.column], self.board[new_row][new_column] = self.board[new_row][new_column], self.board[self.selected_piece.row][self.selected_piece.column]
+        self.selected_piece.update_position(new_row, new_column)
                     

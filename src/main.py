@@ -1,19 +1,14 @@
 import pygame
-from board import Board
 from constants import *
-from lower_section import LowerSection, Button
-from mouse import Mouse
+from game import Game
 
 # creating the window of the application
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.font.init()
 
 def main():
     # Initializing parts of the game (board and the section below it)
-    board = Board()
-    lower_section = LowerSection(window, SILVER)
-    lower_section.initialize_lower_section(DIM_GRAY)
-    mouse = Mouse(board.board)
-
+    game = Game(window)
     clock = pygame.time.Clock()
     active = True
     while active:
@@ -22,8 +17,24 @@ def main():
             if event.type == pygame.QUIT:
                 active = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse.check_if_piece_clicked()
-        board.draw(window)  # drawing the board
+                # DOES THIS IF THE PLAYER CLICKS
+                # GETS POSITION, CHECKS FOR PIECE SELECTION/MOVE
+                pos = pygame.mouse.get_pos()
+                if pos[1] < (HEIGHT - BUTTON_HUD_HEIGHT):
+                    game.select(pos)
+                else:
+                    # Functionality of buttons for the lower section
+                    button = game.select_button(pos)
+                    if not button:
+                        continue
+                    if button.text == "QUIT":
+                        active = False
+                    elif button.text == "RESTART":
+                        game = Game(window)
+                    elif button.text == "UNDO":
+                        # IMPLEMENT UNDO FEATURE HERE
+                        pass
+        game.board.draw(window)  # drawing the board
         
         pygame.display.update() # updating the display
 
