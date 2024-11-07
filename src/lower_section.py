@@ -1,6 +1,7 @@
 import pygame
 from constants import *
 
+
 # Class used for buttons in the lower section
 class Button():
     def __init__(self, color, x,y,width,height, text=''):
@@ -14,6 +15,17 @@ class Button():
     # Function for drawing the buttons
     def draw(self,win) -> None:
         pygame.draw.rect(win, self.color, (self.x,self.y,self.width,self.height),0)
+        if self.text != '':
+            font = pygame.font.SysFont('arial', 20)
+            text_surface = font.render(self.text, True, (0, 0, 0))
+            text_rect = text_surface.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
+            win.blit(text_surface, text_rect)
+
+    def b_clicked(self, pos):
+        mouse_x, mouse_y = pos
+        if self.x <= mouse_x <= self.x + self.width and self.y <= mouse_y <= self.y + self.height:
+            return True
+        return False
 
 
 class LowerSection():
@@ -36,3 +48,4 @@ class LowerSection():
             self.buttons.append(button)
             start_pos_x += 237.5 # Specific value to make the buttons placed symmetrically
         
+

@@ -4,6 +4,7 @@ from game import Game
 
 # creating the window of the application
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.font.init()
 
 def main():
     # Initializing parts of the game (board and the section below it)
@@ -23,7 +24,16 @@ def main():
                     game.select(pos)
                 else:
                     # Functionality of buttons for the lower section
-                    pass
+                    button = game.select_button(pos)
+                    if not button:
+                        continue
+                    if button.text == "QUIT":
+                        active = False
+                    elif button.text == "RESTART":
+                        game = Game(window)
+                    elif button.text == "UNDO":
+                        # IMPLEMENT UNDO FEATURE HERE
+                        pass
         game.board.draw(window)  # drawing the board
         
         pygame.display.update() # updating the display

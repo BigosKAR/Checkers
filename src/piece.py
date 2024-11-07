@@ -24,6 +24,7 @@ class Piece():
     # drawing the individual piece
     def draw(self, win) -> None:
         radius = CELL_SIZE//2 
+        pygame.draw.circle(win, BLACK, (self.x, self.y), radius-8)
         pygame.draw.circle(win, self.color, (self.x, self.y), radius-10)
 
     def king_promotion(self):

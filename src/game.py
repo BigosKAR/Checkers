@@ -1,7 +1,7 @@
 import pygame
 from board import Board
 from constants import *
-from lower_section import LowerSection
+from lower_section import LowerSection, Button
 
 class Game():
     def __init__(self, window):
@@ -21,7 +21,13 @@ class Game():
             dest_row, dest_column = self.coords_to_row_col(pos)
             self.board.move(dest_row, dest_column)
             self.board.selected_piece = None
-    
+
+    def select_button(self, pos):
+        for button in self.lower_section.buttons:
+            if button.b_clicked(pos):
+                return button
+        return None
+
     # Function turns coordinates from get_pos() and turns into row and column number
     def coords_to_row_col(self, pos):
         x, y = pos
