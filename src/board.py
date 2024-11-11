@@ -63,4 +63,8 @@ class Board():
             self.selected_piece.king_promotion()
         self.board[self.selected_piece.row][self.selected_piece.column], self.board[new_row][new_column] = self.board[new_row][new_column], self.board[self.selected_piece.row][self.selected_piece.column]
         self.selected_piece.update_position(new_row, new_column)
+
+    def delete_piece(self, piece):
+        self.board[piece.row][piece.column] = 0
+        
                     

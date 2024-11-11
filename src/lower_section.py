@@ -39,13 +39,17 @@ class LowerSection():
     # Draws the lower section with buttons
     def initialize_lower_section(self, button_color) -> None:
         pygame.draw.rect(self.window, self.color, (0, HEIGHT-BUTTON_HUD_HEIGHT, WIDTH, BUTTON_HUD_HEIGHT))
-        button_names = ['QUIT', 'RESTART', 'UNDO']
-        start_pos_x = 87.5
+        button_names = ['QUIT', 'RESTART', 'UNDO', 'REDO']  # Add REDO button
+        button_width = 150
+        button_spacing = (WIDTH - (len(button_names) * button_width)) / (len(button_names) + 1)
+        y_position = HEIGHT - BUTTON_HUD_HEIGHT + 25
 
-        for i in range(len(button_names)):
-            button = Button(button_color, start_pos_x, 875, 150, 50, text=button_names[i])
-            button.draw(self.window)
+        # Dynamically space buttons
+        x_position = button_spacing
+        for name in button_names:
+            button = Button(button_color, x_position, y_position, button_width, 50, text=name)
             self.buttons.append(button)
-            start_pos_x += 237.5 # Specific value to make the buttons placed symmetrically
+            button.draw(self.window)
+            x_position += button_width + button_spacing  # Space out buttons evenly
         
 

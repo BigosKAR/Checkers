@@ -32,8 +32,10 @@ def main():
                     elif button.text == "RESTART":
                         game = Game(window)
                     elif button.text == "UNDO":
-                        # IMPLEMENT UNDO FEATURE HERE
-                        pass
+                        game.undo_move()
+                    elif button.text == "REDO":
+                        game.redo_move()
+                    
         game.board.draw(window)  # drawing the board
         
         pygame.display.update() # updating the display
