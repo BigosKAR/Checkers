@@ -6,6 +6,7 @@ from game import Game
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.font.init()
 
+
 def main():
     # Initializing parts of the game (board and the section below it)
     game = Game(window)
@@ -21,7 +22,9 @@ def main():
                 # GETS POSITION, CHECKS FOR PIECE SELECTION/MOVE
                 pos = pygame.mouse.get_pos()
                 if pos[1] < (HEIGHT - BUTTON_HUD_HEIGHT):
-                    game.select(pos)
+                    result = game.select(pos)
+                    if result:
+                        print(result)
                 else:
                     # Functionality of buttons for the lower section
                     button = game.select_button(pos)
@@ -35,13 +38,16 @@ def main():
                         game.undo_move()
                     elif button.text == "REDO":
                         game.redo_move()
-                    
-        game.board.draw(window)  # drawing the board
-        
-        pygame.display.update() # updating the display
+
+        game.board.draw(window)
+        if game.board.selected_piece:
+            moves = game.board.get_valid_moves(game.board.selected_piece)
+            game.board.highlight_moves(window, moves)
+
+        pygame.display.update()  # updating the display
 
     pygame.quit()
-    
+
 
 if __name__ == "__main__":
     main()

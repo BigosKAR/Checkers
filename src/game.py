@@ -15,11 +15,11 @@ class Game():
         self.temp_stack = []
 
     def push(self):
-        #Push the current board state to the main stack.
+        # Push the current board state to the main stack.
         self.main_stack.append(copy.deepcopy(self.board.board))
 
     def pop(self):
-        #Undo the last move by reverting to the previous board state.
+        # Undo the last move by reverting to the previous board state.
         if len(self.main_stack) > 1:
             self.temp_stack.append(self.main_stack.pop())  # Save current state for redo
             self.board.board = copy.deepcopy(self.main_stack[-1])
@@ -43,6 +43,10 @@ class Game():
     def move_piece(self, new_row, new_col):
         """Move a piece and save the new board state."""
         self.board.move(new_row, new_col)
+        game_over_status = self.board.check_game_over()
+        if game_over_status:
+            print(game_over_status)  # Notify the result (can later be integrated into UI)
+            return game_over_status  # Optional return for game-over state
         self.push()  # Save the new board state
         self.remove()  # Clear the redo stack
         print(f"Move recorded: {self.board.selected_piece} to ({new_row}, {new_col})")
@@ -51,10 +55,9 @@ class Game():
         """Call pop to undo the last move."""
         self.pop()
 
-
     # Function used to select a piece or move selected piece
     def select(self, pos):
-        if self.board.selected_piece == None:
+        if self.board.selected_piece is None:
             for row in range(ROWS):
                 for column in range(COLUMNS):
                     if self.board.board[row][column] != 0:
@@ -64,8 +67,7 @@ class Game():
             dest_row, dest_column = self.coords_to_row_col(pos)
             if dest_row is not None and dest_column is not None:
                 if self.board.board[dest_row][dest_column] == 0:
-                    self.move_piece(dest_row, dest_column)
-                    self.board.selected_piece = None
+                    return self.move_piece(dest_row, dest_column)
                 else:
                     print("Invalid move, cell occupied.")
                     self.board.selected_piece = None
@@ -82,10 +84,8 @@ class Game():
     # Function turns coordinates from get_pos() and turns into row and column number
     def coords_to_row_col(self, pos):
         x, y = pos
-        if 0 <= y < (HEIGHT-BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
+        if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
             row = y // CELL_SIZE
             column = x // CELL_SIZE
             return row, column
         return None, None
-                    
-    
