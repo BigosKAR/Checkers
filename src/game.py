@@ -66,6 +66,7 @@ class Game():
     # Function used to select a piece or move selected piece
     # In game.py
     # In game.py
+    # In game.py
     def select(self, pos):
         if self.board.selected_piece is None:
             for row in range(ROWS):
@@ -80,14 +81,9 @@ class Game():
         else:
             dest_row, dest_column = self.coords_to_row_col(pos)
             if dest_row is not None and dest_column is not None:
-                if self.board.board[dest_row][dest_column] == 0:
-                    move_result = self.move_piece(dest_row, dest_column)
-                    self.board.selected_piece = None  # Reset selection after attempting move
-                    return move_result
-                else:
-                    print("Invalid move, cell occupied.")
-                    self.board.selected_piece = None
-                    return False
+                move_result = self.move_piece(dest_row, dest_column)
+                self.board.selected_piece = None  # Reset selection after attempting move
+                return move_result
             else:
                 print("Invalid position.")
                 self.board.selected_piece = None
@@ -100,10 +96,14 @@ class Game():
         return None
 
     # Function turns coordinates from get_pos() and turns into row and column number
+    # In game.py
+    # In game.py
     def coords_to_row_col(self, pos):
         x, y = pos
         if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
-            row = y // CELL_SIZE
             column = x // CELL_SIZE
-            return row, column
+            row = y // CELL_SIZE
+            return int(row), int(column)  # Ensure row and column are integers
         return None, None
+
+

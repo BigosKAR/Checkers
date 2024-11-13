@@ -42,15 +42,20 @@ class Board():
 
     # In board.py
     def move(self, new_row, new_col):
-        if not (0 <= new_row <= 7 and 0 <= new_col <= 7):
-            self.selected_piece = None
-            return False  # Move was unsuccessful
+        new_row = int(new_row)
+        new_col = int(new_col)
+        print(f"Attempting to move to ({new_row}, {new_col})")
 
-        move_details = self.get_valid_moves(self.selected_piece).get((new_row, new_col))
-        if not move_details:
+        valid_moves = self.get_valid_moves(self.selected_piece)
+        print(
+            f"Valid moves for {self.selected_piece.player} piece at ({self.selected_piece.row}, {self.selected_piece.column}): {valid_moves}")
+        print(f"Valid moves: {list(valid_moves.keys())}")
+
+        move_details = valid_moves.get((new_row, new_col))
+        if move_details is None:
             print("Invalid move.")
             self.selected_piece = None
-            return False  # Move was unsuccessful
+            return False
 
         # Proceed with the move since it's valid
         if (new_row == 7 and self.selected_piece.player == 'WHITE') or \
@@ -64,7 +69,7 @@ class Board():
         self.board[self.selected_piece.row][self.selected_piece.column], self.board[new_row][new_col] = \
             self.board[new_row][new_col], self.board[self.selected_piece.row][self.selected_piece.column]
         self.selected_piece.update_position(new_row, new_col)
-        return True  # Move was successful
+        return True
 
     def delete_piece(self, piece):
         self.board[piece.row][piece.column] = 0
@@ -110,6 +115,7 @@ class Board():
         return moves
 
     # In board.py
+    # In board.py
     def dfs(self, piece, row, col, dx, dy, moves, jumped):
         new_row, new_col = row + dx, col + dy
         if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
@@ -135,9 +141,11 @@ class Board():
             else:
                 return  # Can't jump over, path blocked
 
+    # In board.py
     def highlight_moves(self, window, moves):
         for move in moves.keys():
-            col, row = move[1], move[0]
+            row, col = move  # Correct order: row, column
             x = col * CELL_SIZE + CELL_SIZE // 2
             y = row * CELL_SIZE + CELL_SIZE // 2
             pygame.draw.circle(window, LIGHT_BLUE, (x, y), 15)
+
