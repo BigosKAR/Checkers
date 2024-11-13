@@ -4,8 +4,6 @@ from piece import Piece
 
 
 class Board():
-    # Perimeters for the board such as pieces each color has, number of kings, and current selected piece
-    # With initialization it also creates the 2D array
     def __init__(self):
         self.board = []
         self.pieces = {'RED': 12, 'WHITE': 12}
@@ -13,21 +11,13 @@ class Board():
         self.selected_piece = None
         self.add_pieces()
 
-    # FUNCTIONS FOR INITIALIZING THE BOARD
-
     def draw_board(self, window) -> None:
         for row in range(ROWS):
-            # It start at rows%2 so it can be either 0 or 1
-            # (the white tiles are in opposite positions every row)
-            # Increasing twice every iteration to skip over the black tile
-            # Drawing black and white tiles
             for white in range(row % 2, COLUMNS, 2):
                 pygame.draw.rect(window, WHITE, (row * CELL_SIZE, white * CELL_SIZE, CELL_SIZE, CELL_SIZE))
             for black in range(row % 2 - 1, ROWS, 2):
                 pygame.draw.rect(window, BLACK, (row * CELL_SIZE, black * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-    # Functions that adds the pieces to a 2D array
-    # Either the object or zeros
     def add_pieces(self) -> None:
         for row in range(ROWS):
             self.board.append([])
@@ -42,7 +32,6 @@ class Board():
                 else:
                     self.board[row].append(0)
 
-    # Draws the whole board (first -> the board, then it looks at the 2D array to draw the pieces)
     def draw(self, window) -> None:
         self.draw_board(window)
         for row in range(ROWS):
@@ -51,10 +40,7 @@ class Board():
                 if piece != 0:
                     piece.draw(window)
 
-    # MOVEMENT FUNCTIONS
-
     def move(self, new_row, new_col):
-        # Function for moving pieces and handling king promotion and capture logic.
         if not (0 <= new_row <= 7 and 0 <= new_col <= 7):
             self.selected_piece = None
             return
@@ -74,7 +60,6 @@ class Board():
         self.board[piece.row][piece.column] = 0
 
     def check_game_over(self):
-        # Check if a player has no pieces left or no valid moves.
         red_pieces, white_pieces = 0, 0
         red_moves, white_moves = 0, 0
 
@@ -97,14 +82,14 @@ class Board():
         if red_pieces == 1 and white_pieces == 1 and red_moves == 0 and white_moves == 0:
             return "Tie"
 
-        return None  # Game continues
+        return None
 
     def get_valid_moves(self, piece):
         moves = {}
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         if not piece.king:
-            # Forward movement restricted for non-kings.
+            # Restrict movement for non-kings based on color and direction.
             directions = [d for d in directions if d[0] == piece.direction]
 
         for dx, dy in directions:
@@ -114,20 +99,19 @@ class Board():
     def dfs(self, piece, row, col, dx, dy, moves, jumped):
         new_row, new_col = row + dx, col + dy
         if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
-            return  # Out of bounds
+            return
 
         target = self.board[new_row][new_col]
         if target == 0:
-            # Valid move
             moves[(new_row, new_col)] = jumped
         elif target.color != piece.color and (new_row + dx, new_col + dy) not in jumped:
-            # Possible jump move
             jump_row, jump_col = new_row + dx, new_col + dy
             if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
                 self.dfs(piece, jump_row, jump_col, dx, dy, moves, jumped + [(new_row, new_col)])
 
     def highlight_moves(self, window, moves):
         for move in moves.keys():
-            x = move[1] * CELL_SIZE + CELL_SIZE // 2
-            y = move[0] * CELL_SIZE + CELL_SIZE // 2
+            col, row = move[1], move[0]
+            x = col * CELL_SIZE + CELL_SIZE // 2
+            y = row * CELL_SIZE + CELL_SIZE // 2
             pygame.draw.circle(window, LIGHT_BLUE, (x, y), 15)
