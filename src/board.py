@@ -40,25 +40,36 @@ class Board():
                 if piece != 0:
                     piece.draw(window)
 
+    # In board.py
     def move(self, new_row, new_col):
         if not (0 <= new_row <= 7 and 0 <= new_col <= 7):
             self.selected_piece = None
-            return
-        if (new_row == 7 and self.selected_piece.color == WHITE) or (new_row == 0 and self.selected_piece.color == RED):
-            self.selected_piece.king_promotion()
+            return False  # Move was unsuccessful
 
         move_details = self.get_valid_moves(self.selected_piece).get((new_row, new_col))
-        if move_details:
-            for jump in move_details:
-                self.delete_piece(self.board[jump[0]][jump[1]])
+        if not move_details:
+            print("Invalid move.")
+            self.selected_piece = None
+            return False  # Move was unsuccessful
 
+        # Proceed with the move since it's valid
+        if (new_row == 7 and self.selected_piece.player == 'WHITE') or \
+                (new_row == 0 and self.selected_piece.player == 'RED'):
+            self.selected_piece.king_promotion()
+
+        for jump in move_details:
+            self.delete_piece(self.board[jump[0]][jump[1]])
+
+        # Swap pieces on the board
         self.board[self.selected_piece.row][self.selected_piece.column], self.board[new_row][new_col] = \
-        self.board[new_row][new_col], self.board[self.selected_piece.row][self.selected_piece.column]
+            self.board[new_row][new_col], self.board[self.selected_piece.row][self.selected_piece.column]
         self.selected_piece.update_position(new_row, new_col)
+        return True  # Move was successful
 
     def delete_piece(self, piece):
         self.board[piece.row][piece.column] = 0
 
+    # In board.py
     def check_game_over(self):
         red_pieces, white_pieces = 0, 0
         red_moves, white_moves = 0, 0
@@ -68,10 +79,10 @@ class Board():
                 piece = self.board[row][col]
                 if piece != 0:
                     moves = self.get_valid_moves(piece)
-                    if piece.color == RED:
+                    if piece.player == 'RED':
                         red_pieces += 1
                         red_moves += len(moves)
-                    elif piece.color == WHITE:
+                    elif piece.player == 'WHITE':
                         white_pieces += 1
                         white_moves += len(moves)
 
@@ -95,23 +106,34 @@ class Board():
         for dx, dy in directions:
             self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
 
+        print(f"Valid moves for {piece.player} piece at ({piece.row}, {piece.column}): {moves}")
         return moves
 
+    # In board.py
     def dfs(self, piece, row, col, dx, dy, moves, jumped):
         new_row, new_col = row + dx, col + dy
         if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
             return  # Out of bounds
 
         target = self.board[new_row][new_col]
-        if target == 0:  # Empty spot
+        if target == 0:
             if not jumped:
-                # Normal diagonal move
+                # Normal move
                 moves[(new_row, new_col)] = jumped
-        elif target and target.color != piece.color:
-            # Possible jump over opponent
+            return
+        elif target.player == piece.player:
+            # Blocked by own piece
+            return  # Can't move past own piece
+        else:
+            # Opponent piece, try to jump over
             jump_row, jump_col = new_row + dx, new_col + dy
-            if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
+            if not (0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS):
+                return
+            if self.board[jump_row][jump_col] == 0:
+                # Empty spot after opponent piece, can jump
                 self.dfs(piece, jump_row, jump_col, dx, dy, moves, jumped + [(new_row, new_col)])
+            else:
+                return  # Can't jump over, path blocked
 
     def highlight_moves(self, window, moves):
         for move in moves.keys():
