@@ -93,18 +93,22 @@ class Board():
             directions = [d for d in directions if d[0] == piece.direction]
 
         for dx, dy in directions:
-            self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
+            new_row, new_col = piece.row + dx, piece.column + dy
+            if 0 <= new_row < ROWS and 0 <= new_col < COLUMNS:
+                self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
         return moves
 
     def dfs(self, piece, row, col, dx, dy, moves, jumped):
         new_row, new_col = row + dx, col + dy
         if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
-            return
+            return  # Out of bounds
 
         target = self.board[new_row][new_col]
-        if target == 0:
+        if target == 0 and not jumped:
+            # Allow normal diagonal move if no jumps involved
             moves[(new_row, new_col)] = jumped
-        elif target.color != piece.color and (new_row + dx, new_col + dy) not in jumped:
+        elif target and target.color != piece.color:
+            # Jump over opponent logic
             jump_row, jump_col = new_row + dx, new_col + dy
             if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
                 self.dfs(piece, jump_row, jump_col, dx, dy, moves, jumped + [(new_row, new_col)])
