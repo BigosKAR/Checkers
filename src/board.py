@@ -89,13 +89,12 @@ class Board():
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         if not piece.king:
-            # Restrict movement for non-kings based on color and direction.
+            # Only allow forward directions for non-king pieces
             directions = [d for d in directions if d[0] == piece.direction]
 
         for dx, dy in directions:
-            new_row, new_col = piece.row + dx, piece.column + dy
-            if 0 <= new_row < ROWS and 0 <= new_col < COLUMNS:
-                self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
+            self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
+
         return moves
 
     def dfs(self, piece, row, col, dx, dy, moves, jumped):
@@ -104,11 +103,12 @@ class Board():
             return  # Out of bounds
 
         target = self.board[new_row][new_col]
-        if target == 0 and not jumped:
-            # Allow normal diagonal move if no jumps involved
-            moves[(new_row, new_col)] = jumped
+        if target == 0:  # Empty spot
+            if not jumped:
+                # Normal diagonal move
+                moves[(new_row, new_col)] = jumped
         elif target and target.color != piece.color:
-            # Jump over opponent logic
+            # Possible jump over opponent
             jump_row, jump_col = new_row + dx, new_col + dy
             if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
                 self.dfs(piece, jump_row, jump_col, dx, dy, moves, jumped + [(new_row, new_col)])
