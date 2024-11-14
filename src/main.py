@@ -22,9 +22,7 @@ def main():
                 # GETS POSITION, CHECKS FOR PIECE SELECTION/MOVE
                 pos = pygame.mouse.get_pos()
                 if pos[1] < (HEIGHT - BUTTON_HUD_HEIGHT):
-                    result = game.select(pos)
-                    if result:
-                        print(result)
+                    game.select(pos)
                 else:
                     # Functionality of buttons for the lower section
                     button = game.select_button(pos)
@@ -40,10 +38,8 @@ def main():
                         game.redo_move()
 
         game.board.draw(window)
-        if game.board.selected_piece:
-            moves = game.board.get_valid_moves(game.board.selected_piece)
-            game.board.highlight_moves(window, moves)
-
+        if game.board.selected_piece is not None:
+            game.board.highlight_moves()
         pygame.display.update()  # updating the display
 
     pygame.quit()

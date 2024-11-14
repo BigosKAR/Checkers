@@ -1,10 +1,12 @@
 import pygame
 from constants import *
 from piece import Piece
+from movement_tree import *
 
 
 class Board():
-    def __init__(self):
+    def __init__(self, window):
+        self.window = window
         self.board = []
         self.pieces = {'RED': 12, 'WHITE': 12}
         self.kings = {'RED': 0, 'WHITE': 0}
@@ -14,9 +16,9 @@ class Board():
     def draw_board(self, window) -> None:
         for row in range(ROWS):
             for white in range(row % 2, COLUMNS, 2):
-                pygame.draw.rect(window, WHITE, (row * CELL_SIZE, white * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(window, LIGHT_YELLOW, (row * CELL_SIZE, white * CELL_SIZE, CELL_SIZE, CELL_SIZE))
             for black in range(row % 2 - 1, ROWS, 2):
-                pygame.draw.rect(window, BLACK, (row * CELL_SIZE, black * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(window, GREEN, (row * CELL_SIZE, black * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
     def add_pieces(self) -> None:
         for row in range(ROWS):
@@ -42,17 +44,24 @@ class Board():
 
     # In board.py
     def move(self, new_row, new_col):
-        new_row = int(new_row)
-        new_col = int(new_col)
+        if self.selected_piece.row == new_row and self.selected_piece.column == new_col:
+            self.selected_piece = None
+            return
+        
+        def get_index(array: list, coords: tuple):
+            for i in range(len(array)):
+                if array[i] == coords:
+                    return i
+            return None
         print(f"Attempting to move to ({new_row}, {new_col})")
 
-        valid_moves = self.get_valid_moves(self.selected_piece)
+        root = self.generate_valid_moves()
+        moves, jumped = self.get_valid_moves(root)
         print(
-            f"Valid moves for {self.selected_piece.player} piece at ({self.selected_piece.row}, {self.selected_piece.column}): {valid_moves}")
-        print(f"Valid moves: {list(valid_moves.keys())}")
+            f"Valid moves for {self.selected_piece.player} piece at ({self.selected_piece.row}, {self.selected_piece.column}): {moves[1:]}")
 
-        move_details = valid_moves.get((new_row, new_col))
-        if move_details is None:
+        
+        if (new_row, new_col) not in moves:
             print("Invalid move.")
             self.selected_piece = None
             return False
@@ -62,7 +71,9 @@ class Board():
                 (new_row == 0 and self.selected_piece.player == 'RED'):
             self.selected_piece.king_promotion()
 
-        for jump in move_details:
+        i = get_index(moves, (new_row, new_col))
+
+        for jump in jumped[i]:
             self.delete_piece(self.board[jump[0]][jump[1]])
 
         # Swap pieces on the board
@@ -75,77 +86,89 @@ class Board():
         self.board[piece.row][piece.column] = 0
 
     # In board.py
-    def check_game_over(self):
-        red_pieces, white_pieces = 0, 0
-        red_moves, white_moves = 0, 0
+    # def check_game_over(self):
+    #     red_pieces, white_pieces = 0, 0
+    #     red_moves, white_moves = 0, 0
 
-        for row in range(ROWS):
-            for col in range(COLUMNS):
-                piece = self.board[row][col]
-                if piece != 0:
-                    moves = self.get_valid_moves(piece)
-                    if piece.player == 'RED':
-                        red_pieces += 1
-                        red_moves += len(moves)
-                    elif piece.player == 'WHITE':
-                        white_pieces += 1
-                        white_moves += len(moves)
+    #     for row in range(ROWS):
+    #         for col in range(COLUMNS):
+    #             piece = self.board[row][col]
+    #             if piece != 0:
+    #                 moves = self.get_valid_moves(piece)
+    #                 if piece.player == 'RED':
+    #                     red_pieces += 1
+    #                     red_moves += len(moves)
+    #                 elif piece.player == 'WHITE':
+    #                     white_pieces += 1
+    #                     white_moves += len(moves)
 
-        if red_pieces == 0 or red_moves == 0:
-            return "WHITE wins"
-        if white_pieces == 0 or white_moves == 0:
-            return "RED wins"
-        if red_pieces == 1 and white_pieces == 1 and red_moves == 0 and white_moves == 0:
-            return "Tie"
+    #     if red_pieces == 0 or red_moves == 0:
+    #         return "WHITE wins"
+    #     if white_pieces == 0 or white_moves == 0:
+    #         return "RED wins"
+    #     if red_pieces == 1 and white_pieces == 1 and red_moves == 0 and white_moves == 0:
+    #         return "Tie"
 
-        return None
+    #     return None
 
-    def get_valid_moves(self, piece):
-        moves = {}
-        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+    # def get_valid_moves(self, piece):
+    #     moves = {}
+    #     directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
-        if not piece.king:
-            # Only allow forward directions for non-king pieces
-            directions = [d for d in directions if d[0] == piece.direction]
+    #     if not piece.king:
+    #         # Only allow forward directions for non-king pieces
+    #         directions = [d for d in directions if d[0] == piece.direction]
 
-        for dx, dy in directions:
-            self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
+    #     for dx, dy in directions:
+    #         self.dfs(piece, piece.row, piece.column, dx, dy, moves, [])
 
-        print(f"Valid moves for {piece.player} piece at ({piece.row}, {piece.column}): {moves}")
-        return moves
+    #     print(f"Valid moves for {piece.player} piece at ({piece.row}, {piece.column}): {moves}")
+    #     return moves
 
-    # In board.py
-    # In board.py
-    def dfs(self, piece, row, col, dx, dy, moves, jumped):
-        new_row, new_col = row + dx, col + dy
-        if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
-            return  # Out of bounds
+    def generate_valid_moves(self):
+        move_tree_root = TreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
+        possible_directions = [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
+        def add_moves_to_tree(node: TreeNode, row, col, jumped):
+            captured_a_piece = False
+            for dx, dy in possible_directions:
+                new_row, new_col = row + dx, col + dy
+                if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
+                        continue
+                target = self.board[new_row][new_col]
 
-        target = self.board[new_row][new_col]
-        if target == 0:
-            if not jumped:
-                # Normal move
-                moves[(new_row, new_col)] = jumped
-            return
-        elif target.player == piece.player:
-            # Blocked by own piece
-            return  # Can't move past own piece
-        else:
-            # Opponent piece, try to jump over
-            jump_row, jump_col = new_row + dx, new_col + dy
-            if not (0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS):
-                return
-            if self.board[jump_row][jump_col] == 0:
-                # Empty spot after opponent piece, can jump
-                self.dfs(piece, jump_row, jump_col, dx, dy, moves, jumped + [(new_row, new_col)])
+                if target != 0 and target.color != self.selected_piece.color:
+                    jump_row, jump_col = new_row + dx, new_col + dy
+                    if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
+                        updated_jump = node.jumped + [(new_row, new_col)]
+                        captured_a_piece = True
+                        add_node(node, jump_row, jump_col, dx, dy, updated_jump)
+                elif target == 0 and not jumped:
+                    if captured_a_piece is False:
+                        if dy == 1:
+                            node.insert_right(coords=(new_row, new_col), jumped=jumped)
+                        else:
+                            node.insert_left(coords=(new_row, new_col), jumped=jumped)
+                    
+        def add_node(node, row, column, dx, dy, jumped):
+            if dy == 1:    
+                node.insert_right(coords=(row, column), jumped=jumped)
+                add_moves_to_tree(node.right, row, column, jumped)
             else:
-                return  # Can't jump over, path blocked
+                node.insert_left(coords=(row, column), jumped=jumped)
+                add_moves_to_tree(node.left, row, column, jumped)   
+        
+        add_moves_to_tree(move_tree_root, self.selected_piece.row, self.selected_piece.column, [])
+        return move_tree_root
+                       
+    def get_valid_moves(self, root):
+        moves, jumped = fetch_moves_from_tree(root)
+        return moves, jumped
 
-    # In board.py
-    def highlight_moves(self, window, moves):
-        for move in moves.keys():
-            row, col = move  # Correct order: row, column
-            x = col * CELL_SIZE + CELL_SIZE // 2
-            y = row * CELL_SIZE + CELL_SIZE // 2
-            pygame.draw.circle(window, LIGHT_BLUE, (x, y), 15)
+    def highlight_moves(self):
+        root = self.generate_valid_moves()
+        moves, jumped = self.get_valid_moves(root)
+        for move in moves[1:]:
+            x = move[1] * CELL_SIZE + CELL_SIZE // 2
+            y = move[0] * CELL_SIZE + CELL_SIZE // 2
+            pygame.draw.circle(self.window, RED, (x, y), 15)
 
