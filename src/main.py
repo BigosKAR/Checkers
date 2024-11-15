@@ -6,6 +6,7 @@ from game import Game
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.font.init()
 
+
 def main():
     # Initializing parts of the game (board and the section below it)
     game = Game(window)
@@ -35,13 +36,14 @@ def main():
                         game.undo_move()
                     elif button.text == "REDO":
                         game.redo_move()
-                    
-        game.board.draw(window)  # drawing the board
-        
-        pygame.display.update() # updating the display
+
+        game.board.draw(window)
+        if game.board.selected_piece is not None:
+            game.board.highlight_moves()
+        pygame.display.update()  # updating the display
 
     pygame.quit()
-    
+
 
 if __name__ == "__main__":
     main()

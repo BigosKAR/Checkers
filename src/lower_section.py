@@ -42,7 +42,7 @@ class LowerSection():
         button_names = ['QUIT', 'RESTART', 'UNDO', 'REDO']  # Add REDO button
         button_width = 150
         button_spacing = (WIDTH - (len(button_names) * button_width)) / (len(button_names) + 1)
-        y_position = HEIGHT - BUTTON_HUD_HEIGHT + 25
+        y_position = HEIGHT - BUTTON_HUD_HEIGHT + 75
 
         # Dynamically space buttons
         x_position = button_spacing
