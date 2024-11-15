@@ -41,6 +41,7 @@ class Game():
             print("No moves to redo!")
 
     def move_piece(self, new_row, new_col):
+        #CHECK IF TWO POSSIBLE MOVEMENTS TO THE SAME PLACE
         """Move a piece and save the new board state."""
         move_successful = self.board.move(new_row, new_col)
         if not move_successful:
@@ -69,6 +70,7 @@ class Game():
                     piece = self.board.board[row][column]
                     if piece != 0 and piece.clicked(pos):
                         self.board.selected_piece = piece
+                        self.board.store_valid_moves()
                         print(f"Selected {piece.player} piece at ({piece.row}, {piece.column})")
                         return True  # Piece selected
             print("No piece selected.")
@@ -78,10 +80,13 @@ class Game():
             if dest_row is not None and dest_column is not None:
                 # GET MOVES IN MOVE_PIECE
                 move_result = self.move_piece(dest_row, dest_column)
+                if move_result:
+                    self.board.reset_move_details()
                 self.board.selected_piece = None  # Reset selection after attempting move
                 return move_result
             else:
                 print("Invalid position.")
+                self.board.reset_move_details()
                 self.board.selected_piece = None
                 return False
 

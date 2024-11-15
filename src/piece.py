@@ -19,7 +19,11 @@ class Piece:
 
         self.x = CELL_SIZE * self.column + CELL_SIZE // 2
         self.y = CELL_SIZE * self.row + CELL_SIZE // 2
-        self.radius = CELL_SIZE // 2 - 5
+        self.radius = CELL_SIZE // 2 - 5\
+        
+        # Will be used to store possible moves/jumps when selecting this piece
+        self.moves = None
+        self.jumped = None
 
     # Calculate position
     def get_position(self):

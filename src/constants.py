@@ -23,5 +23,5 @@ BUTTON_HUD_HEIGHT = 200
 
 # OTHER
 
-FPS = 60
-ALL_DIRECTIONS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+FPS = 10
+ALL_DIRECTIONS = [(1, 1), (-1, 1), (-1, -1), (1, -1)]
