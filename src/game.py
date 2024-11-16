@@ -9,6 +9,7 @@ class Game():
         self.window = window
         self.board = Board(window)
         self.lower_section = LowerSection(window, SILVER)
+        self.turn = True # True for WHITE, False for RED
 
         # Stacks for board states
         self.main_stack = [copy.deepcopy(self.board.board)]  # Start with the initial board
@@ -23,6 +24,8 @@ class Game():
         if len(self.main_stack) > 1:
             self.temp_stack.append(self.main_stack.pop())  # Save current state for redo
             self.board.board = copy.deepcopy(self.main_stack[-1])
+            self.switch_turns()
+            self.lower_section.change_turn_text(self.turn)
             print("Move undone.")
         else:
             print("No moves to undo!")
@@ -36,6 +39,8 @@ class Game():
         if self.temp_stack:
             self.main_stack.append(self.temp_stack.pop())
             self.board.board = copy.deepcopy(self.main_stack[-1])
+            self.switch_turns()
+            self.lower_section.change_turn_text(self.turn)
             print("Move redone.")
         else:
             print("No moves to redo!")
@@ -68,7 +73,7 @@ class Game():
             for row in range(ROWS):
                 for column in range(COLUMNS):
                     piece = self.board.board[row][column]
-                    if piece != 0 and piece.clicked(pos):
+                    if piece != 0 and piece.clicked(pos) and self.turn_check(piece):
                         self.board.selected_piece = piece
                         self.board.store_valid_moves()
                         print(f"Selected {piece.player} piece at ({piece.row}, {piece.column})")
@@ -82,6 +87,8 @@ class Game():
                 move_result = self.move_piece(dest_row, dest_column)
                 if move_result:
                     self.board.reset_move_details()
+                    self.switch_turns()
+                    self.lower_section.change_turn_text(self.turn)
                 self.board.selected_piece = None  # Reset selection after attempting move
                 return move_result
             else:
@@ -96,9 +103,13 @@ class Game():
                 return button
         return None
 
+    def turn_check(self, piece):
+        return (self.turn and piece.player == 'WHITE') or (not self.turn and piece.player == 'RED')
+
+    def switch_turns(self):
+        self.turn = not self.turn
+
     # Function turns coordinates from get_pos() and turns into row and column number
-    # In game.py
-    # In game.py
     def coords_to_row_col(self, pos):
         x, y = pos
         if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:

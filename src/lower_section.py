@@ -33,6 +33,7 @@ class LowerSection():
         self.window = window
         self.color = color
         self.buttons = []
+        self.turn_button = Button(WHITE, 350, HEIGHT-BUTTON_HUD_HEIGHT+ 150, 100, 50, text="WHITE - turn")
         self.initialize_lower_section(DIM_GRAY)
 
 
@@ -52,4 +53,15 @@ class LowerSection():
             button.draw(self.window)
             x_position += button_width + button_spacing  # Space out buttons evenly
         
+        self.turn_button.draw(self.window)
+
+    def change_turn_text(self, turn_var):
+        if turn_var is True:
+            self.turn_button.text = "WHITE - turn"
+            self.turn_button.color = WHITE
+            self.turn_button.draw(self.window)
+        else:
+            self.turn_button.text = "RED - turn"
+            self.turn_button.color = RED
+            self.turn_button.draw(self.window)
 
