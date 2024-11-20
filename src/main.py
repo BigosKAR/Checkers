@@ -32,9 +32,9 @@ def main():
                         active = False
                     elif button.text == "RESTART":
                         game = Game(window)
-                    elif button.text == "UNDO":
+                    elif button.text == "UNDO" and game.board.selected_piece is None:
                         game.undo_move()
-                    elif button.text == "REDO":
+                    elif button.text == "REDO" and game.board.selected_piece is None:
                         game.redo_move()
 
         game.board.draw(window)

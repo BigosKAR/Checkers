@@ -167,10 +167,14 @@ class Board():
         - add_node: it adds a singular node to the tree but then also checks for every possibility in the next branches. So it is a recursion with two functions
         """
         move_tree_root = TreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
-        possible_directions = [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
+        if self.selected_piece.king == True:
+            possible_directions = ALL_DIRECTIONS
+        else:
+            possible_directions = [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
 
         def add_moves_to_tree(node: TreeNode, row, col, jumped, capturing):
             for dx, dy in possible_directions:
+                print("test")
                 new_row, new_col = row + dx, col + dy
                 if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
                     continue
@@ -187,7 +191,6 @@ class Board():
                     jump_row, jump_col = new_row + dx, new_col + dy
                     if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
                         updated_jump = node.jumped + [(new_row, new_col)]
-                        captured_a_piece = True
                         add_node(node, jump_row, jump_col, dx, dy, updated_jump)
                 elif target == 0 and not jumped and not capturing:
                     if dy == 1:
