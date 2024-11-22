@@ -40,13 +40,7 @@ def main():
                         game.redo_move()
 
         # Draw everything
-        game.board.draw(window)
-        if game.board.selected_piece:
-            moves = game.board.get_valid_moves(game.board.selected_piece)
-            game.board.highlight_moves(window, moves)
-
-        # Draw the lower section
-        game.lower_section.draw()
+        game.draw(window)
 
         pygame.display.update()  # Updating the display
 

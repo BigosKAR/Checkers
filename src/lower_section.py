@@ -2,7 +2,6 @@ import pygame
 from constants import *
 
 
-# Class used for buttons in the lower section
 class Button:
     def __init__(self, color, x, y, width, height, text=''):
         self.color = color
@@ -40,17 +39,31 @@ class LowerSection:
     def create_buttons(self):
         button_names = ['QUIT', 'RESTART', 'UNDO', 'REDO']
         button_width = 150
-        button_spacing = (WIDTH - (len(button_names) * button_width)) / (len(button_names) + 1)
-        y_position = HEIGHT - BUTTON_HUD_HEIGHT + 25
+        button_height = 50
+        button_spacing = 20
+        total_button_width = len(button_names) * button_width + (len(button_names) - 1) * button_spacing
+        x_start = (WIDTH - total_button_width) // 2
+        y_position = HEIGHT - BUTTON_HUD_HEIGHT + (BUTTON_HUD_HEIGHT - button_height) // 2
 
-        x_position = button_spacing
+        x_position = x_start
         for name in button_names:
-            button = Button(self.button_color, x_position, y_position, button_width, 50, text=name)
+            button = Button(
+                self.button_color,
+                x_position,
+                y_position,
+                button_width,
+                button_height,
+                text=name
+            )
             self.buttons.append(button)
             x_position += button_width + button_spacing
 
     # Draws the lower section with buttons
     def draw(self) -> None:
-        pygame.draw.rect(self.window, self.color, (0, HEIGHT - BUTTON_HUD_HEIGHT, WIDTH, BUTTON_HUD_HEIGHT))
+        pygame.draw.rect(
+            self.window,
+            self.color,
+            (0, HEIGHT - BUTTON_HUD_HEIGHT, WIDTH, BUTTON_HUD_HEIGHT)
+        )
         for button in self.buttons:
             button.draw(self.window)

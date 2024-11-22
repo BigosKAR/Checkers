@@ -13,7 +13,16 @@ class Board:
         window.fill(BLACK)
         for row in range(ROWS):
             for col in range(row % 2, COLUMNS, 2):
-                pygame.draw.rect(window, WHITE, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(
+                    window,
+                    WHITE,
+                    (
+                        MARGIN + col * CELL_SIZE,
+                        row * CELL_SIZE,
+                        CELL_SIZE,
+                        CELL_SIZE,
+                    ),
+                )
 
     def add_pieces(self) -> None:
         for row in range(ROWS):
@@ -167,7 +176,6 @@ class Board:
 
         return moves
 
-
     def _get_captures(self, piece, row, col, skipped, directions, moves):
         for dx, dy in directions:
             new_row = row + dx
@@ -201,7 +209,7 @@ class Board:
     def highlight_moves(self, window, moves):
         for move in moves.keys():
             row, col = move
-            x = col * CELL_SIZE + CELL_SIZE // 2
+            x = MARGIN + col * CELL_SIZE + CELL_SIZE // 2
             y = row * CELL_SIZE + CELL_SIZE // 2
             pygame.draw.circle(window, LIGHT_BLUE, (x, y), 15)
 
@@ -213,8 +221,11 @@ class Board:
 
     def coords_to_row_col(self, pos):
         x, y = pos
-        if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
-            col = x // CELL_SIZE
+        if (
+            0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT)
+            and MARGIN <= x < (MARGIN + BOARD_WIDTH)
+        ):
+            col = (x - MARGIN) // CELL_SIZE
             row = y // CELL_SIZE
             return int(row), int(col)
         return None, None
