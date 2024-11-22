@@ -2,86 +2,79 @@ import pygame
 from board import Board
 from constants import *
 from lower_section import LowerSection, Button
-import copy
 
-class Game():
+
+class Game:
     def __init__(self, window):
         self.window = window
         self.board = Board()
         self.lower_section = LowerSection(window, SILVER)
+        self.move_history = []
+        self.redo_stack = []
+        self.turn = 'RED'  # Keep track of which player's turn it is
 
-        # Stacks for board states
-        self.main_stack = [copy.deepcopy(self.board.board)]  # Start with the initial board
-        self.temp_stack = []
-
-    def push(self):
-        # Push the current board state to the main stack.
-        self.main_stack.append(copy.deepcopy(self.board.board))
-
-    def pop(self):
-        # Undo the last move by reverting to the previous board state.
-        if len(self.main_stack) > 1:
-            self.temp_stack.append(self.main_stack.pop())  # Save current state for redo
-            self.board.board = copy.deepcopy(self.main_stack[-1])
-            print("Move undone.")
-        else:
-            print("No moves to undo!")
-
-    def remove(self):
-        """Clear the redo stack after a new move."""
-        self.temp_stack = []
-
-    def redo_move(self):
-        """Redo the last undone move."""
-        if self.temp_stack:
-            self.main_stack.append(self.temp_stack.pop())
-            self.board.board = copy.deepcopy(self.main_stack[-1])
-            print("Move redone.")
-        else:
-            print("No moves to redo!")
-
-    # In game.py
-    def move_piece(self, new_row, new_col):
-        """Move a piece and save the new board state."""
-        move_successful = self.board.move(new_row, new_col)
-        if not move_successful:
+    def move_piece(self, piece, new_row, new_col):
+        """Move a piece and save the move details."""
+        move_details = self.board.move(piece, new_row, new_col)
+        if not move_details:
             # Move was invalid; do not proceed
             print("Move was invalid.")
             return False  # Return early since move failed
+
+        # Save move details for undo
+        self.move_history.append(move_details)
+        self.redo_stack.clear()  # Clear redo stack after a new move
+
+        # Switch turn
+        self.switch_turn()
 
         game_over_status = self.board.check_game_over()
         if game_over_status:
             print(game_over_status)  # Notify the result (can later be integrated into UI)
             return game_over_status  # Optional return for game-over state
 
-        self.push()  # Save the new board state
-        self.remove()  # Clear the redo stack
-        print(f"Move recorded: {self.board.selected_piece} to ({new_row}, {new_col})")
+        print(f"Move recorded: {piece.player} piece to ({new_row}, {new_col})")
         return True
 
     def undo_move(self):
-        """Call pop to undo the last move."""
-        self.pop()
+        """Undo the last move."""
+        if not self.move_history:
+            print("No moves to undo!")
+            return
+        last_move = self.move_history.pop()
+        self.board.undo_move(last_move)
+        self.redo_stack.append(last_move)
+        self.switch_turn()
+        print("Move undone.")
 
-    # Function used to select a piece or move selected piece
-    # In game.py
-    # In game.py
-    # In game.py
+    def redo_move(self):
+        """Redo the last undone move."""
+        if not self.redo_stack:
+            print("No moves to redo!")
+            return
+        move = self.redo_stack.pop()
+        self.board.redo_move(move)
+        self.move_history.append(move)
+        self.switch_turn()
+        print("Move redone.")
+
+    def switch_turn(self):
+        self.turn = 'WHITE' if self.turn == 'RED' else 'RED'
+
     def select(self, pos):
         if self.board.selected_piece is None:
-            for row in range(ROWS):
-                for column in range(COLUMNS):
-                    piece = self.board.board[row][column]
-                    if piece != 0 and piece.clicked(pos):
-                        self.board.selected_piece = piece
-                        print(f"Selected {piece.player} piece at ({piece.row}, {piece.column})")
-                        return True  # Piece selected
-            print("No piece selected.")
-            return False
+            piece = self.board.get_piece_at_position(pos)
+            if piece and piece.player == self.turn:
+                self.board.selected_piece = piece
+                print(f"Selected {piece.player} piece at ({piece.row}, {piece.column})")
+                return True  # Piece selected
+            else:
+                print("No valid piece selected.")
+                return False
         else:
-            dest_row, dest_column = self.coords_to_row_col(pos)
+            dest_row, dest_column = self.board.coords_to_row_col(pos)
             if dest_row is not None and dest_column is not None:
-                move_result = self.move_piece(dest_row, dest_column)
+                move_result = self.move_piece(self.board.selected_piece, dest_row, dest_column)
                 self.board.selected_piece = None  # Reset selection after attempting move
                 return move_result
             else:
@@ -94,16 +87,3 @@ class Game():
             if button.b_clicked(pos):
                 return button
         return None
-
-    # Function turns coordinates from get_pos() and turns into row and column number
-    # In game.py
-    # In game.py
-    def coords_to_row_col(self, pos):
-        x, y = pos
-        if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
-            column = x // CELL_SIZE
-            row = y // CELL_SIZE
-            return int(row), int(column)  # Ensure row and column are integers
-        return None, None
-
-

@@ -2,8 +2,9 @@ import pygame
 from constants import *
 from game import Game
 
-# creating the window of the application
+# Creating the window of the application
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Checkers Game")
 pygame.font.init()
 
 
@@ -18,8 +19,7 @@ def main():
             if event.type == pygame.QUIT:
                 active = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # DOES THIS IF THE PLAYER CLICKS
-                # GETS POSITION, CHECKS FOR PIECE SELECTION/MOVE
+                # Does this if the player clicks
                 pos = pygame.mouse.get_pos()
                 if pos[1] < (HEIGHT - BUTTON_HUD_HEIGHT):
                     result = game.select(pos)
@@ -39,12 +39,16 @@ def main():
                     elif button.text == "REDO":
                         game.redo_move()
 
+        # Draw everything
         game.board.draw(window)
         if game.board.selected_piece:
             moves = game.board.get_valid_moves(game.board.selected_piece)
             game.board.highlight_moves(window, moves)
 
-        pygame.display.update()  # updating the display
+        # Draw the lower section
+        game.lower_section.draw()
+
+        pygame.display.update()  # Updating the display
 
     pygame.quit()
 
