@@ -12,18 +12,28 @@ class Game():
         self.turn = True # True for WHITE, False for RED
 
         # Stacks for board states
-        self.main_stack = [copy.deepcopy(self.board.board)]  # Start with the initial board
+        self.main_stack = [(copy.deepcopy(self.board.board), self.board.pieces['WHITE'], self.board.pieces['RED'])]  # Start with the initial board
         self.temp_stack = []
 
     def push(self):
-        # Push the current board state to the main stack.
-        self.main_stack.append(copy.deepcopy(self.board.board))
+        """
+        Pushes an entry on top of the stack
+        An entry is a tuple with the following elements:
+        [0]: copy of 2D array representation of the board
+        [1]: piece count for the WHITE color
+        [2]: piece count for the RED color
+        """
+        self.main_stack.append((copy.deepcopy(self.board.board), self.board.pieces['WHITE'], self.board.pieces['RED']))
 
     def pop(self):
-        # Undo the last move by reverting to the previous board state.
+        """
+        Loads parameters from the stack entry. (2D Board, White Piece Count, Red Piece Count)
+        """
         if len(self.main_stack) > 1:
             self.temp_stack.append(self.main_stack.pop())  # Save current state for redo
-            self.board.board = copy.deepcopy(self.main_stack[-1])
+            self.board.board, white_pieces, red_pieces = copy.deepcopy(self.main_stack[-1])
+            self.board.update_piece_count(white_pieces=white_pieces, red_pieces=red_pieces)
+            
             self.switch_turns()
             self.lower_section.change_turn_text(self.turn)
             print("Move undone.")
@@ -35,10 +45,15 @@ class Game():
         self.temp_stack = []
 
     def redo_move(self):
-        """Redo the last undone move."""
+        """
+        Gets necessary elements from the temporary stack, and stores it in the main stack.
+        Load parameters from the last main stack entry
+        """
         if self.temp_stack:
             self.main_stack.append(self.temp_stack.pop())
-            self.board.board = copy.deepcopy(self.main_stack[-1])
+            self.board.board, white_pieces, red_pieces = copy.deepcopy(self.main_stack[-1])
+            self.board.update_piece_count(white_pieces=white_pieces, red_pieces=red_pieces)
+            
             self.switch_turns()
             self.lower_section.change_turn_text(self.turn)
             print("Move redone.")
@@ -85,10 +100,11 @@ class Game():
             if dest_row is not None and dest_column is not None:
                 # GET MOVES IN MOVE_PIECE
                 move_result = self.move_piece(dest_row, dest_column)
-                if move_result:
+                if move_result: # Is successful
                     self.board.reset_move_details()
+                    
                     self.switch_turns()
-                    self.lower_section.change_turn_text(self.turn)
+                    self.lower_section.change_turn_text(self.turn) # Changing the text that notifies whose turn it is
                 self.board.selected_piece = None  # Reset selection after attempting move
                 return move_result
             else:

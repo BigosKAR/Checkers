@@ -14,6 +14,7 @@ def main():
     active = True
     while active:
         clock.tick(FPS)
+        game.board.check_game_over()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 active = False
@@ -40,6 +41,7 @@ def main():
         game.board.draw(window)
         if game.board.selected_piece is not None:
             game.board.highlight_moves()
+        pygame.display.set_caption(f"WHITE: {game.board.pieces['WHITE']}, RED: {game.board.pieces['RED']}")
         pygame.display.update()  # updating the display
 
     pygame.quit()

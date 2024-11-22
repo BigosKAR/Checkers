@@ -126,6 +126,7 @@ class Board():
         if (new_row == 7 and self.selected_piece.player == 'WHITE') or \
                 (new_row == 0 and self.selected_piece.player == 'RED'):
             self.selected_piece.king_promotion()
+            self.pieces[self.selected_piece.player] -= 1
 
         # j is calculated to deal with an edge case
         i = get_index(self.selected_piece.moves, (new_row, new_col))
@@ -146,6 +147,7 @@ class Board():
         return True
 
     def delete_piece(self, piece):
+        self.pieces[piece.player] -= 1
         self.board[piece.row][piece.column] = 0
 
     def reset_move_details(self):
@@ -167,10 +169,7 @@ class Board():
         - add_node: it adds a singular node to the tree but then also checks for every possibility in the next branches. So it is a recursion with two functions
         """
         move_tree_root = TreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
-        if self.selected_piece.king == True:
-            possible_directions = ALL_DIRECTIONS
-        else:
-            possible_directions = [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
+        possible_directions = [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
 
         def add_moves_to_tree(node: TreeNode, row, col, jumped, capturing):
             for dx, dy in possible_directions:
@@ -240,3 +239,49 @@ class Board():
         """
         root = self.generate_valid_moves()
         self.selected_piece.moves, self.selected_piece.jumped = self.get_valid_moves(root)
+
+    def update_piece_count(self, white_pieces, red_pieces):
+        self.board.pieces['WHITE'] = white_pieces
+        self.board.pieces['RED'] = red_pieces
+
+    def check_game_over(self):
+        def win_popup(window, winner: str):
+            """
+            Inner function for creating a win message
+            """
+            
+            popup_width, popup_height = 450, 150
+            popup_x = (WIDTH - popup_width) // 2
+            popup_y = (HEIGHT - popup_height) // 2
+            popup_rect = pygame.Rect(popup_x, popup_y, popup_width, popup_height)
+
+            button_width, button_height = 150, 50
+            win_notification = pygame.Rect(popup_x + 50, popup_y + 75, button_width, button_height)
+
+            font = pygame.font.SysFont('arial', 24)
+            message_surface = font.render(f'{winner.upper()} won!', True, (0, 0, 0))
+        
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if win_notification.collidepoint(event.pos):
+                            pygame.quit()
+                            exit()
+    
+
+                # Draw the pop up window
+                pygame.draw.rect(window, (200, 200, 200), popup_rect)
+                window.blit(message_surface, (popup_x + 50, popup_y + 30))
+                pygame.draw.rect(window, (0, 255, 0), win_notification)
+                window.blit(message_surface, (win_notification.x + 10, win_notification.y + 10))
+
+                pygame.display.update()
+
+        if self.pieces['WHITE'] == 0:
+            win_popup(self.window, 'RED') # 0 -> White wins
+        elif self.pieces['RED'] == 0:
+            win_popup(self.window, 'WHITE')
