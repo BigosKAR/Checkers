@@ -74,9 +74,15 @@ class Game:
         else:
             dest_row, dest_column = self.board.coords_to_row_col(pos)
             if dest_row is not None and dest_column is not None:
-                move_result = self.move_piece(self.board.selected_piece, dest_row, dest_column)
-                self.board.selected_piece = None  # Reset selection after attempting move
-                return move_result
+                valid_moves = self.board.get_valid_moves(self.board.selected_piece)
+                if (dest_row, dest_column) in valid_moves:
+                    move_result = self.move_piece(self.board.selected_piece, dest_row, dest_column)
+                    self.board.selected_piece = None  # Reset selection after attempting move
+                    return move_result
+                else:
+                    print("Invalid move selected.")
+                    self.board.selected_piece = None
+                    return False
             else:
                 print("Invalid position.")
                 self.board.selected_piece = None

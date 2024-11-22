@@ -6,7 +6,6 @@ from piece import Piece
 class Board:
     def __init__(self):
         self.board = []
-        self.pieces = {'RED': 12, 'WHITE': 12}
         self.selected_piece = None
         self.add_pieces()
 
@@ -48,12 +47,12 @@ class Board:
 
         old_row, old_col = piece.row, piece.column
 
-        # Proceed with the move since it's valid
+        # Proceed with the move
         # Remove captured pieces
         captured_pieces = []
-        for jump in move_details:
-            captured_piece = self.board[jump[0]][jump[1]]
-            captured_pieces.append((jump[0], jump[1], captured_piece))
+        for capture in move_details['captures']:
+            captured_piece = self.board[capture[0]][capture[1]]
+            captured_pieces.append((capture[0], capture[1], captured_piece))
             self.delete_piece(captured_piece)
 
         # Move the piece
@@ -149,34 +148,55 @@ class Board:
             # Only allow forward directions for non-king pieces
             directions = [d for d in directions if d[0] == piece.direction]
 
+        # Get capturing moves
+        capturing_moves = {}
+        self._get_captures(piece, piece.row, piece.column, [], directions, capturing_moves)
+
+        # If capturing moves are available, include both capturing and non-capturing moves
         for dx, dy in directions:
-            self._traverse(piece, piece.row, piece.column, dx, dy, moves, [], piece.king)
+            new_row = piece.row + dx
+            new_col = piece.column + dy
+            if 0 <= new_row < ROWS and 0 <= new_col < COLUMNS:
+                if self.board[new_row][new_col] == 0:
+                    # Add normal move if the destination is empty
+                    moves[(new_row, new_col)] = {'captures': []}
+
+        # Add capturing moves to the possible moves
+        if capturing_moves:
+            moves.update(capturing_moves)
 
         return moves
 
-    def _traverse(self, piece, row, col, dx, dy, moves, skipped, is_king):
-        new_row, new_col = row + dx, col + dy
-        if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
-            return  # Out of bounds
 
-        current = self.board[new_row][new_col]
-        if current == 0:
-            if skipped:
-                # Must continue jumping if possible
-                moves[(new_row, new_col)] = skipped
-            else:
-                moves[(new_row, new_col)] = skipped
-            if not is_king:
-                return
-        elif current.player != piece.player:
-            next_row, next_col = new_row + dx, new_col + dy
-            if 0 <= next_row < ROWS and 0 <= next_col < COLUMNS:
-                next_square = self.board[next_row][next_col]
-                if next_square == 0:
-                    new_skipped = skipped + [(new_row, new_col)]
-                    self._traverse(piece, next_row, next_col, dx, dy, moves, new_skipped, is_king)
-        else:
-            return  # Blocked by own piece
+    def _get_captures(self, piece, row, col, skipped, directions, moves):
+        for dx, dy in directions:
+            new_row = row + dx
+            new_col = col + dy
+            jump_row = new_row + dx
+            jump_col = new_col + dy
+            if 0 <= new_row < ROWS and 0 <= new_col < COLUMNS and 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS:
+                current = self.board[new_row][new_col]
+                if current != 0 and current.player != piece.player:
+                    if self.board[jump_row][jump_col] == 0:
+                        if (jump_row, jump_col) not in moves:
+                            new_skipped = skipped + [(new_row, new_col)]
+                            # Temporarily move the piece and remove the captured piece
+                            original_piece = self.board[jump_row][jump_col]
+                            self.board[row][col] = 0
+                            self.board[new_row][new_col] = 0
+                            self.board[jump_row][jump_col] = piece
+
+                            # Recursive call to continue capturing
+                            self._get_captures(piece, jump_row, jump_col, new_skipped, directions, moves)
+
+                            # If no further captures, add the move
+                            if not any(jump_row in move and jump_col in move for move in moves):
+                                moves[(jump_row, jump_col)] = {'captures': new_skipped}
+
+                            # Restore the board
+                            self.board[row][col] = piece
+                            self.board[new_row][new_col] = current
+                            self.board[jump_row][jump_col] = original_piece
 
     def highlight_moves(self, window, moves):
         for move in moves.keys():
