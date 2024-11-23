@@ -40,7 +40,8 @@ def main():
                     elif button.text == "REDO" and game.board.selected_piece is None:
                         game.redo_move()
 
-        game.board.draw(window)
+        game.board.draw(window, game.lower_section)
+
         if game.board.selected_piece is not None:
             game.board.highlight_moves()
         pygame.display.set_caption(f"WHITE: {game.board.pieces['WHITE']}, RED: {game.board.pieces['RED']}")

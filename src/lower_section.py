@@ -33,7 +33,7 @@ class LowerSection():
         self.window = window
         self.color = color
         self.buttons = []
-        self.turn_button = Button(WHITE, 350, HEIGHT-BUTTON_HUD_HEIGHT+ 150, 100, 50, text="WHITE - turn")
+        self.turn_button = Button(WHITE, 350, HEIGHT-BUTTON_HUD_HEIGHT+ 135, 100, 50, text="WHITE - turn")
         self.initialize_lower_section(DIM_GRAY)
 
 
@@ -65,3 +65,14 @@ class LowerSection():
             self.turn_button.color = RED
             self.turn_button.draw(self.window)
 
+    def draw_taken_pieces(self,pieces, color, start_x, start_y):
+        radius = 10  # Size of the pieces
+        spacing = 5  # Space between pieces
+        for i, piece in enumerate(pieces):
+            x = start_x + i * (2 * radius + spacing)
+            y = start_y
+            pygame.draw.circle(self.window, color, (x, y), radius)
+            if piece == 1:
+                pygame.draw.circle(self.window, BLACK, (x, y), radius - 5, 2)
+
+        pygame.display.update()

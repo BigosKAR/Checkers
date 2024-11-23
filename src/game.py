@@ -12,18 +12,21 @@ class Game():
         self.turn = True # True for WHITE, False for RED
 
         # Stacks for board states
-        self.main_stack = [(copy.deepcopy(self.board.board), self.board.pieces['WHITE'], self.board.pieces['RED'])]  # Start with the initial board
+        self.main_stack = [(copy.deepcopy(self.board.board), (self.board.pieces['WHITE'], self.board.pieces['RED']),
+                            (self.board.white_pieces_taken, self.board.red_pieces_taken))]  # Start with the initial board
         self.temp_stack = []
 
     def push(self):
         """
         Pushes an entry on top of the stack
-        An entry is a tuple with the following elements:
+        An entry is a tuple of tuples with the following elements:
         [0]: copy of 2D array representation of the board
-        [1]: piece count for the WHITE color
-        [2]: piece count for the RED color
+        [1]: piece count for WHITE -> [1][0], piece count for RED -> [1][1]
+        [2]: piece count for WHITE taken -> [2][0], piece count for RED taken -> [2][1]
         """
-        self.main_stack.append((copy.deepcopy(self.board.board), self.board.pieces['WHITE'], self.board.pieces['RED']))
+        print("Pushing: ", self.board.white_pieces_taken, self.board.red_pieces_taken)
+        self.main_stack.append((copy.deepcopy(self.board.board), (self.board.pieces['WHITE'], self.board.pieces['RED']), 
+                               (self.board.white_pieces_taken.copy(), self.board.red_pieces_taken.copy())))
 
     def pop(self):
         """
@@ -31,8 +34,9 @@ class Game():
         """
         if len(self.main_stack) > 1:
             self.temp_stack.append(self.main_stack.pop())  # Save current state for redo
-            self.board.board, white_pieces, red_pieces = copy.deepcopy(self.main_stack[-1])
-            self.board.update_piece_count(white_pieces=white_pieces, red_pieces=red_pieces)
+            self.board.board, pieces, taken_pieces = copy.deepcopy(self.main_stack[-1])
+            self.board.update_piece_count(white_pieces=pieces[0], red_pieces=pieces[1])
+            self.board.white_pieces_taken, self.board.red_pieces_taken = taken_pieces
             
             self.switch_turns()
             self.lower_section.change_turn_text(self.turn)
@@ -51,8 +55,9 @@ class Game():
         """
         if self.temp_stack:
             self.main_stack.append(self.temp_stack.pop())
-            self.board.board, white_pieces, red_pieces = copy.deepcopy(self.main_stack[-1])
-            self.board.update_piece_count(white_pieces=white_pieces, red_pieces=red_pieces)
+            self.board.board, pieces, taken_pieces = copy.deepcopy(self.main_stack[-1])
+            self.board.update_piece_count(white_pieces=pieces[0], red_pieces=pieces[1])
+            self.board.white_pieces_taken, self.board.red_pieces_taken = taken_pieces
             
             self.switch_turns()
             self.lower_section.change_turn_text(self.turn)
@@ -128,5 +133,6 @@ class Game():
             row = y // CELL_SIZE
             return int(row), int(column)
         return None, None
+
 
 

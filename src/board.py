@@ -8,9 +8,32 @@ class Board():
     def __init__(self, window):
         self.window = window
         self.board = []
+
         self.pieces = {'RED': 12, 'WHITE': 12}
+        self.red_pieces_taken = []
+        self.white_pieces_taken = []
         self.selected_piece = None
+
         self.add_pieces()
+
+    def quicksort_pieces_taken(self, pieces_taken: list) -> None:
+        def partition(pieces_taken: list, left: int, right: int) -> int: #return pivot position
+            pivot_idx = left
+            pivot = pieces_taken[left]
+            for i in range(left+ 1, right + 1):
+                if pieces_taken[i] > pivot:
+                    pivot_idx += 1
+                    pieces_taken[i], pieces_taken[pivot_idx] = pieces_taken[pivot_idx], pieces_taken[i]
+            pieces_taken[left], pieces_taken[pivot_idx] = pieces_taken[pivot_idx], pieces_taken[left]
+            return pivot_idx
+
+        def quicksort(pieces_taken: list, left: int, right: int) -> None:
+            if left >= right: #Such a small range that you cannot sort it anymore (it is sorted)
+                return 
+            pivot_idx = partition(pieces_taken, left, right)
+            quicksort(pieces_taken, left, pivot_idx - 1)
+            quicksort(pieces_taken, pivot_idx + 1, right)
+        return quicksort(pieces_taken, 0, len(pieces_taken) - 1)
 
     def draw_board(self, window) -> None:
         for row in range(ROWS):
@@ -33,13 +56,16 @@ class Board():
                 else:
                     self.board[row].append(0)
 
-    def draw(self, window) -> None:
+    def draw(self, window, lower_section) -> None:
         self.draw_board(window)
         for row in range(ROWS):
             for column in range(COLUMNS):
                 piece = self.board[row][column]
                 if piece != 0:
                     piece.draw(window)
+        lower_section.initialize_lower_section(DIM_GRAY)
+        lower_section.draw_taken_pieces(self.red_pieces_taken, RED, 25, HEIGHT - 50)
+        lower_section.draw_taken_pieces(self.white_pieces_taken, WHITE, WIDTH - 290, HEIGHT - 50)
 
     # In board.py
     def move(self, new_row, new_col):
@@ -139,6 +165,18 @@ class Board():
         return True
 
     def delete_piece(self, piece):
+        if piece.color == RED:
+            if piece.king:
+                self.red_pieces_taken.append(1)
+            else:
+                self.red_pieces_taken.append(0)
+            self.quicksort_pieces_taken(self.red_pieces_taken)
+        else:
+            if piece.king:
+                self.white_pieces_taken.append(1)
+            else:
+                self.white_pieces_taken.append(0)
+            self.quicksort_pieces_taken(self.white_pieces_taken)
         self.pieces[piece.player] -= 1
         self.board[piece.row][piece.column] = 0
 
@@ -252,10 +290,11 @@ class Board():
             popup_rect = pygame.Rect(popup_x, popup_y, popup_width, popup_height)
 
             button_width, button_height = 150, 50
-            win_notification = pygame.Rect(popup_x + 50, popup_y + 75, button_width, button_height)
+            win_notification = pygame.Rect(popup_x + 150, popup_y + 50, button_width, button_height)
 
             font = pygame.font.SysFont('arial', 24)
             message_surface = font.render(f'{winner.upper()} won!', True, (0, 0, 0))
+            restart_surface = font.render(f'Restart', True, (0, 0, 0))
         
             running = True
             while running:
@@ -272,7 +311,7 @@ class Board():
                 pygame.draw.rect(window, (200, 200, 200), popup_rect)
                 window.blit(message_surface, (popup_x + 50, popup_y + 30))
                 pygame.draw.rect(window, (0, 255, 0), win_notification)
-                window.blit(message_surface, (win_notification.x + 10, win_notification.y + 10))
+                window.blit(restart_surface, (win_notification.x + 10, win_notification.y + 10))
 
                 pygame.display.update()
 
