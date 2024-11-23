@@ -24,7 +24,6 @@ class Game():
         [1]: piece count for WHITE -> [1][0], piece count for RED -> [1][1]
         [2]: piece count for WHITE taken -> [2][0], piece count for RED taken -> [2][1]
         """
-        print("Pushing: ", self.board.white_pieces_taken, self.board.red_pieces_taken)
         self.main_stack.append((copy.deepcopy(self.board.board), (self.board.pieces['WHITE'], self.board.pieces['RED']), 
                                (self.board.white_pieces_taken.copy(), self.board.red_pieces_taken.copy())))
 
