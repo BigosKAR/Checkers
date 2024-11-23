@@ -63,19 +63,15 @@ class Game():
     def move_piece(self, new_row, new_col):
         #CHECK IF TWO POSSIBLE MOVEMENTS TO THE SAME PLACE
         """Move a piece and save the new board state."""
+        old_row, old_col = self.board.selected_piece.row, self.board.selected_piece.column
         move_successful = self.board.move(new_row, new_col)
         if not move_successful:
             print("Move was invalid.")
             return False
 
-        # game_over_status = self.board.check_game_over()
-        # if game_over_status:
-        #     print(game_over_status)  # Notify the result (can later be integrated into UI)
-        #     return game_over_status  # Optional return for game-over state
-
         self.push()  # Save the new board state
         self.remove()  # Clear the redo stack
-        print(f"Move recorded: {self.board.selected_piece} to ({new_row}, {new_col})")
+        print(f"Move recorded: ({old_row}, {old_col}) to ({new_row}, {new_col})")
         return True
 
     def undo_move(self):
@@ -92,7 +88,7 @@ class Game():
                         self.board.selected_piece = piece
                         self.board.store_valid_moves()
                         print(f"Selected {piece.player} piece at ({piece.row}, {piece.column})")
-                        return True  # Piece selected
+                        return True
             print("No piece selected.")
             return False
         else:
@@ -105,7 +101,7 @@ class Game():
                     
                     self.switch_turns()
                     self.lower_section.change_turn_text(self.turn) # Changing the text that notifies whose turn it is
-                self.board.selected_piece = None  # Reset selection after attempting move
+                self.board.selected_piece = None
                 return move_result
             else:
                 print("Invalid position.")
@@ -125,13 +121,12 @@ class Game():
     def switch_turns(self):
         self.turn = not self.turn
 
-    # Function turns coordinates from get_pos() and turns into row and column number
     def coords_to_row_col(self, pos):
         x, y = pos
         if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
             column = x // CELL_SIZE
             row = y // CELL_SIZE
-            return int(row), int(column)  # Ensure row and column are integers
+            return int(row), int(column)
         return None, None
 
 

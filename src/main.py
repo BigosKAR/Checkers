@@ -14,7 +14,9 @@ def main():
     active = True
     while active:
         clock.tick(FPS)
-        game.board.check_game_over()
+        game_state = game.board.check_game_over()
+        if game_state:
+            game = Game(window)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 active = False

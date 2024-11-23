@@ -9,7 +9,6 @@ class Board():
         self.window = window
         self.board = []
         self.pieces = {'RED': 12, 'WHITE': 12}
-        self.kings = {'RED': 0, 'WHITE': 0}
         self.selected_piece = None
         self.add_pieces()
 
@@ -55,25 +54,20 @@ class Board():
             The player must choose which direction he wants to go.
             """
 
-            # Creating the pop up window
             popup_width, popup_height = 450, 150
             popup_x = (WIDTH - popup_width) // 2
             popup_y = (HEIGHT - popup_height) // 2
             popup_rect = pygame.Rect(popup_x, popup_y, popup_width, popup_height)
 
-            # Creating buttons
             button_width, button_height = 150, 50
             left_rect = pygame.Rect(popup_x + 50, popup_y + 75, button_width, button_height)
             right_rect = pygame.Rect(popup_x + 250, popup_y + 75, button_width, button_height)
 
-            # Creating text for window and buttons
             font = pygame.font.SysFont('arial', 24)
             message_surface = font.render('Which way? (not relative to the piece!)', True, (0, 0, 0))
             left_surface = font.render('LEFT PATH', True, (0, 0, 0))
             right_surface = font.render('RIGHT PATH', True, (0, 0, 0))
 
-            # Running the pop up window and waiting for response
-            # Returns different indexes based on the player's choice
             running = True
             while running:
                 for event in pygame.event.get():
@@ -85,8 +79,7 @@ class Board():
                             return first_index
                         elif right_rect.collidepoint(event.pos):
                             return second_index
-
-                # Draw the pop up window
+                        
                 pygame.draw.rect(window, (200, 200, 200), popup_rect)
                 window.blit(message_surface, (popup_x + 50, popup_y + 30))
                 pygame.draw.rect(window, (0, 255, 0), left_rect)
@@ -111,9 +104,9 @@ class Board():
                     return j
             return None
 
-        print(f"Attempting to move to ({new_row}, {new_col})")
-        print(
-            f"Valid moves for {self.selected_piece.player} piece at ({self.selected_piece.row}, {self.selected_piece.column}): {self.selected_piece.moves[1:]}")
+        # print(f"Attempting to move to ({new_row}, {new_col})")
+        # print(
+        #     f"Valid moves for {self.selected_piece.player} piece at ({self.selected_piece.row}, {self.selected_piece.column}): {self.selected_piece.moves[1:]}")
 
         
         if (new_row, new_col) not in self.selected_piece.moves:
@@ -126,7 +119,6 @@ class Board():
         if (new_row == 7 and self.selected_piece.player == 'WHITE') or \
                 (new_row == 0 and self.selected_piece.player == 'RED'):
             self.selected_piece.king_promotion()
-            self.pieces[self.selected_piece.player] -= 1
 
         # j is calculated to deal with an edge case
         i = get_index(self.selected_piece.moves, (new_row, new_col))
@@ -168,12 +160,11 @@ class Board():
         - add_moves_to_tree: it is going to populate the tree with possible selected piece positions. It is also going to store the position of captured pieces
         - add_node: it adds a singular node to the tree but then also checks for every possibility in the next branches. So it is a recursion with two functions
         """
+        possible_directions = ALL_DIRECTIONS if self.selected_piece.king else [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
         move_tree_root = TreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
-        possible_directions = [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
-
+        
         def add_moves_to_tree(node: TreeNode, row, col, jumped, capturing):
             for dx, dy in possible_directions:
-                print("test")
                 new_row, new_col = row + dx, col + dy
                 if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
                     continue
@@ -209,8 +200,7 @@ class Board():
             else:
                 node.insert_left(coords=(row, column), jumped=jumped)
                 add_moves_to_tree(node.left, row, column, jumped, True)
-
-        # Executing everything and returning the root of the created tree
+        # Executing everything and returning the root of the created tree        
         add_moves_to_tree(move_tree_root, self.selected_piece.row, self.selected_piece.column, [], False)
         return move_tree_root
                        
@@ -219,7 +209,10 @@ class Board():
         Function made for better readability
         Just returns two lists made by fetch_moves_from_tree located in movement_tree.py
         """
-        moves, jumped = fetch_moves_from_tree(root)
+        if self.selected_piece.king == True:
+            moves, jumped = fetch_moves_from_king_tree(root)
+        else:
+            moves, jumped = fetch_moves_from_tree(root)
         return moves, jumped
 
     def highlight_moves(self):
@@ -237,12 +230,15 @@ class Board():
         Helper function calls a function to create a create with the moves and jumped pieces
         Then it stores the information of those trees in the attributes of the selected_piece
         """
-        root = self.generate_valid_moves()
+        if self.selected_piece.king == True:
+            root = self.generate_valid_king_moves()
+        else:
+            root = self.generate_valid_moves()
         self.selected_piece.moves, self.selected_piece.jumped = self.get_valid_moves(root)
 
     def update_piece_count(self, white_pieces, red_pieces):
-        self.board.pieces['WHITE'] = white_pieces
-        self.board.pieces['RED'] = red_pieces
+        self.pieces['WHITE'] = white_pieces
+        self.pieces['RED'] = red_pieces
 
     def check_game_over(self):
         def win_popup(window, winner: str):
@@ -269,9 +265,8 @@ class Board():
                         exit()
                     elif event.type == pygame.MOUSEBUTTONDOWN:
                         if win_notification.collidepoint(event.pos):
-                            pygame.quit()
-                            exit()
-    
+                            return True
+
 
                 # Draw the pop up window
                 pygame.draw.rect(window, (200, 200, 200), popup_rect)
@@ -282,6 +277,73 @@ class Board():
                 pygame.display.update()
 
         if self.pieces['WHITE'] == 0:
-            win_popup(self.window, 'RED') # 0 -> White wins
+            return win_popup(self.window, 'RED') # 0 -> White wins
         elif self.pieces['RED'] == 0:
-            win_popup(self.window, 'WHITE')
+            return win_popup(self.window, 'WHITE')
+        return False
+
+    def generate_valid_king_moves(self):
+            """
+            Firstly, we create a root of the tree that will contain every possible move and capture. It is going to be the coordinates of the selected piece.
+            We are defining two functions in this function:
+            - add_moves_to_tree: it is going to populate the tree with possible selected piece positions. It is also going to store the position of captured pieces
+            - add_node: it adds a singular node to the tree but then also checks for every possibility in the next branches. So it is a recursion with two functions
+            """
+            king_root = KingTreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
+            
+            def add_moves_to_tree(node: KingTreeNode, row, col, jumped, capturing, directions):
+                for dx, dy in directions:
+                    new_row, new_col = row + dx, col + dy
+                    if not (0 <= new_row < ROWS and 0 <= new_col < COLUMNS):
+                        continue
+                    """
+                    Target symbolizes the tile where the new row and new column point to.
+                    If it is a piece (different from 0), then it has to calculate the new coordinates because we need to jump over a piece.
+                    To the current node's jumped list we are adding the coordinates of the piece we are jumping over.
+                    Then, with add_node we are looking for any additional possible jumps from the new row and column.
+                    In the other case we are looking at an empty tile so depending on the direction we add a node.
+                    """
+                    target = self.board[new_row][new_col]
+
+                    if target != 0 and target.color != self.selected_piece.color:
+                        jump_row, jump_col = new_row + dx, new_col + dy
+                        if 0 <= jump_row < ROWS and 0 <= jump_col < COLUMNS and self.board[jump_row][jump_col] == 0:
+                            updated_jump = node.jumped + [(new_row, new_col)]
+                            add_node(node, jump_row, jump_col, dx, dy, updated_jump, capture=True)
+                    elif target == 0 and not jumped and not capturing:
+                        add_node(node, new_row, new_col, dx, dy, [], capture=False)
+                        
+
+            def add_node(king_node, row, column, dx, dy, jumped, capture):
+                updated_directions = ALL_DIRECTIONS.copy()
+                current_direction = (dx, dy)
+                if current_direction == (-1, 1):
+                    king_node.insert_right_up(coords=(row, column), jumped=jumped)
+                    if capture:
+                        updated_directions.remove((1, -1))
+                        add_moves_to_tree(king_node.right_up, row, column, jumped, capture, directions=updated_directions)
+                elif current_direction == (1, 1):
+                    king_node.insert_right_down(coords=(row, column), jumped=jumped)
+                    if capture:
+                        updated_directions.remove((-1, -1))
+                        add_moves_to_tree(king_node.right_down, row, column, jumped, capture, directions=updated_directions)
+                elif current_direction == (-1, -1):
+                    king_node.insert_left_up(coords=(row, column), jumped=jumped)
+                    if capture:
+                        updated_directions.remove((1, 1))
+                        add_moves_to_tree(king_node.left_up, row, column, jumped, capture, directions=updated_directions)
+                else:
+                    king_node.insert_left_down(coords=(row, column), jumped=jumped)
+                    if capture:
+                        updated_directions.remove((-1, 1))
+                        add_moves_to_tree(king_node.left_down, row, column, jumped, capture, directions=updated_directions)
+
+                
+            # Executing everything and returning the root of the created tree        
+            add_moves_to_tree(king_root, self.selected_piece.row, self.selected_piece.column, [], False, ALL_DIRECTIONS)
+            return king_root
+
+
+
+
+
