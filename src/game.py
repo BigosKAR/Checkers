@@ -23,6 +23,8 @@ class Game():
         [0]: copy of 2D array representation of the board
         [1]: piece count for WHITE -> [1][0], piece count for RED -> [1][1]
         [2]: piece count for WHITE taken -> [2][0], piece count for RED taken -> [2][1]
+        Runtime Complexity:
+        - Average case = Worst case = O(1) -> O(n) if we need to resize the stack
         """
         self.main_stack.append((copy.deepcopy(self.board.board), (self.board.pieces['WHITE'], self.board.pieces['RED']), 
                                (self.board.white_pieces_taken.copy(), self.board.red_pieces_taken.copy())))
@@ -30,6 +32,8 @@ class Game():
     def pop(self):
         """
         Loads parameters from the stack entry. (2D Board, White Piece Count, Red Piece Count)
+        Runtime Complexity:
+        - Average case = Worst case = O(1) -> O(n) if we need to resize the stack
         """
         if len(self.main_stack) > 1:
             self.temp_stack.append(self.main_stack.pop())  # Save current state for redo
@@ -44,13 +48,19 @@ class Game():
             print("No moves to undo!")
 
     def remove(self):
-        """Clear the redo stack after a new move."""
+        """
+        Clear the redo stack after a new move.
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         self.temp_stack = []
 
     def redo_move(self):
         """
         Gets necessary elements from the temporary stack, and stores it in the main stack.
         Load parameters from the last main stack entry
+        Runtime Complexity:
+        - Average case = Worst case = O(1) -> O(n) if we need to resize the stack
         """
         if self.temp_stack:
             self.main_stack.append(self.temp_stack.pop())
@@ -66,7 +76,11 @@ class Game():
 
     def move_piece(self, new_row, new_col):
         #CHECK IF TWO POSSIBLE MOVEMENTS TO THE SAME PLACE
-        """Move a piece and save the new board state."""
+        """
+        Move a piece and save the new board state.
+        Runtime Complexity:
+        - Average case = Worst case = O(n)
+        """
         old_row, old_col = self.board.selected_piece.row, self.board.selected_piece.column
         move_successful = self.board.move(new_row, new_col)
         if not move_successful:
@@ -79,11 +93,19 @@ class Game():
         return True
 
     def undo_move(self):
-        """Call pop to undo the last move."""
+        """
+        Call pop to undo the last move.
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         self.pop()
 
     # Function used to select a piece or move selected piece
     def select(self, pos):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(n^2)
+        """
         if self.board.selected_piece is None:
             for row in range(ROWS):
                 for column in range(COLUMNS):
@@ -114,18 +136,34 @@ class Game():
                 return False
 
     def select_button(self, pos):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(n)
+        """
         for button in self.lower_section.buttons:
             if button.b_clicked(pos):
                 return button
         return None
 
     def turn_check(self, piece):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         return (self.turn and piece.player == 'WHITE') or (not self.turn and piece.player == 'RED')
 
     def switch_turns(self):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         self.turn = not self.turn
 
     def coords_to_row_col(self, pos):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         x, y = pos
         if 0 <= y < (HEIGHT - BUTTON_HUD_HEIGHT) and 0 <= x < WIDTH:
             column = x // CELL_SIZE

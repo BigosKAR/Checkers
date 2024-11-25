@@ -8,6 +8,10 @@ pygame.font.init()
 
 
 def main():
+    """
+    Runtime Complexity:
+    - Average case = Worst case = O(n) n - number of events
+    """
     # Initializing parts of the game (board and the section below it)
     game = Game(window)
     clock = pygame.time.Clock()

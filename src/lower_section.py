@@ -14,6 +14,10 @@ class Button():
 
     # Function for drawing the buttons
     def draw(self,win) -> None:
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         pygame.draw.rect(win, self.color, (self.x,self.y,self.width,self.height),0)
         if self.text != '':
             font = pygame.font.SysFont('arial', 20)
@@ -22,6 +26,10 @@ class Button():
             win.blit(text_surface, text_rect)
 
     def b_clicked(self, pos):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         mouse_x, mouse_y = pos
         if self.x <= mouse_x <= self.x + self.width and self.y <= mouse_y <= self.y + self.height:
             return True
@@ -39,6 +47,10 @@ class LowerSection():
 
     # Draws the lower section with buttons
     def initialize_lower_section(self, button_color) -> None:
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(n) n - number of buttons
+        """
         pygame.draw.rect(self.window, self.color, (0, HEIGHT-BUTTON_HUD_HEIGHT, WIDTH, BUTTON_HUD_HEIGHT))
         button_names = ['QUIT', 'RESTART', 'UNDO', 'REDO']  # Add REDO button
         button_width = 150
@@ -56,6 +68,10 @@ class LowerSection():
         self.turn_button.draw(self.window)
 
     def change_turn_text(self, turn_var):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(1)
+        """
         if turn_var is True:
             self.turn_button.text = "WHITE - turn"
             self.turn_button.color = WHITE
@@ -66,6 +82,10 @@ class LowerSection():
             self.turn_button.draw(self.window)
 
     def draw_taken_pieces(self,pieces, color, start_x, start_y):
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(n) n - number of pieces
+        """
         radius = 10  # Size of the pieces
         spacing = 5  # Space between pieces
         for i, piece in enumerate(pieces):

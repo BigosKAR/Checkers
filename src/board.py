@@ -16,36 +16,49 @@ class Board():
 
         self.add_pieces()
 
-    def quicksort_pieces_taken(self, pieces_taken: list) -> None:
+    def mergesort_pieces_taken(self, pieces_taken: list) -> None:
         """
-        Quick sort algorithms used to sort array containting pieces and kings taken by any of the players.
+        Merge sort algorithms used to sort array containting pieces and kings taken by any of the players.
         Pieces are represented by 0 and kings by 1. This quick sort algorithm is going to sort the array in descending order.
         Function used for implementing the visual representation of the pieces taken by the players, 
         where kings appear on the left side and pieces on the right side.
 
         Runtime Complexity: 
         - Average Case: O(nlogn)
-        - Worst Case: O(n^2)
+        - Worst Case: O(nlogn)
 
-        FOR THE GROUP: Potentially we need to switch it to INSERTION because this algorithm is not good with sorted arrays.
         """
-        def partition(pieces_taken: list, left: int, right: int) -> int: #return pivot position
-            pivot_idx = left
-            pivot = pieces_taken[left]
-            for i in range(left+ 1, right + 1):
-                if pieces_taken[i] > pivot:
-                    pivot_idx += 1
-                    pieces_taken[i], pieces_taken[pivot_idx] = pieces_taken[pivot_idx], pieces_taken[i]
-            pieces_taken[left], pieces_taken[pivot_idx] = pieces_taken[pivot_idx], pieces_taken[left]
-            return pivot_idx
+        def combine(left: list, right: list) -> list:
+            result = [0] * (len(left) + len(right))
+            left_idx = right_idx = result_idx = 0
+            while left_idx < len(left) and right_idx < len(right):
+                if left[left_idx] > right[right_idx]:
+                    result[result_idx] = left[left_idx]
+                    left_idx += 1
+                else:
+                    result[result_idx] = right[right_idx]
+                    right_idx += 1
+                result_idx += 1
 
-        def quicksort(pieces_taken: list, left: int, right: int) -> None:
-            if left >= right: #Such a small range that you cannot sort it anymore (it is sorted)
-                return 
-            pivot_idx = partition(pieces_taken, left, right)
-            quicksort(pieces_taken, left, pivot_idx - 1)
-            quicksort(pieces_taken, pivot_idx + 1, right)
-        return quicksort(pieces_taken, 0, len(pieces_taken) - 1)
+            # Add the rest to the result array
+            while left_idx < len(left):
+                result[result_idx] = left[left_idx]
+                left_idx += 1
+                result_idx += 1
+            while right_idx < len(right):
+                result[result_idx] = right[right_idx]
+                right_idx += 1
+                result_idx += 1
+            return result
+        
+        def mergesort(arr: list) -> list:
+            if not arr or len(arr) <= 1:
+                return arr
+            mid = len(arr) // 2
+            left = mergesort(arr[:mid]) # mid not included in the array
+            right = mergesort(arr[mid:])
+            return combine(left, right)
+        return mergesort(pieces_taken)
 
     def draw_board(self, window) -> None:
         """
@@ -214,7 +227,7 @@ class Board():
         """
         Function used to delete a piece from the board by setting it to 0
         Runtime Complexity:
-        - Average Case = Worst Case: O(nlogn) (because of quicksort_pieces_taken)
+        - Average Case = Worst Case: O(nlogn) (because of mergesort_pieces_taken)
         """
         if isinstance(piece, Piece):
             if piece.color == RED:
@@ -222,13 +235,13 @@ class Board():
                     self.red_pieces_taken.append(1)
                 else:
                     self.red_pieces_taken.append(0)
-                self.quicksort_pieces_taken(self.red_pieces_taken)
+                self.red_pieces_taken = self.mergesort_pieces_taken(self.red_pieces_taken) #change params
             else:
                 if piece.king:
                     self.white_pieces_taken.append(1)
                 else:
                     self.white_pieces_taken.append(0)
-                self.quicksort_pieces_taken(self.white_pieces_taken)
+                self.white_pieces_taken = self.mergesort_pieces_taken(self.white_pieces_taken) # change params
             self.pieces[piece.player] -= 1
             self.board[piece.row][piece.column] = 0
 

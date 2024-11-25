@@ -4,6 +4,7 @@ class TreeNode:
         Each node is going to store two arrays:
         - first one is going to be a list of two element tuples representing coordinates (row, column)
         - second one is going to be a list containing the coordinates (row, column) of pieces you are able to jump over
+        Time complexity for each insert move is O(1)
         """
         self.coords = coords
         self.jumped = jumped if jumped else []
@@ -36,6 +37,10 @@ def fetch_moves_from_tree(node: TreeNode) -> list:
     It visits the nodes in a pre-order way.
     """
     def traverse_move_tree(node: TreeNode) -> None:
+        """
+        Runtime Complexity:
+        - Average case = Worst case = O(n) n - number of nodes in the tree
+        """
         if node is None:
             return
         move_list.append(node.coords)
@@ -54,6 +59,7 @@ class KingTreeNode():
         Each node is going to store two arrays:
         - first one is going to be a list of two element tuples representing coordinates (row, column)
         - second one is going to be a list containing the coordinates (row, column) of pieces you are able to jump over
+        Time complexity for each insert move is O(1)
         """
         self.coords = coords
         self.jumped = jumped if jumped else []
@@ -86,6 +92,8 @@ def fetch_moves_from_king_tree(node: KingTreeNode) -> list:
         You want to access the possible coordinates of the pieces you will jump over if you go to the coordinates moves_list[5].
         Then, you will be able to access all those piece with the same index in jumped_list -> jumped_list[5]
         Each element of the jumped_list is a list
+    Runtime Complexity:
+    - Average case = Worst case = O(n) n - number of nodes in the tree
     """
     move_list = []
     jumped_list = []
