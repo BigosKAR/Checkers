@@ -6,7 +6,7 @@ from game import Game
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.font.init()
 
-
+# Every frame (10 times per second), check for mouse input and update the board
 def main():
     """
     Runtime Complexity:
@@ -16,6 +16,7 @@ def main():
     game = Game(window)
     clock = pygame.time.Clock()
     active = True
+    # Every frame, check for mouse input (quitting, clicking on piece, undo, redo, etc.)
     while active:
         clock.tick(FPS)
         game_state = game.board.check_game_over()

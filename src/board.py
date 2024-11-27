@@ -39,8 +39,6 @@ class Board():
                     result[result_idx] = right[right_idx]
                     right_idx += 1
                 result_idx += 1
-
-            # Add the rest to the result array
             while left_idx < len(left):
                 result[result_idx] = left[left_idx]
                 left_idx += 1
@@ -55,7 +53,7 @@ class Board():
             if not arr or len(arr) <= 1:
                 return arr
             mid = len(arr) // 2
-            left = mergesort(arr[:mid]) # mid not included in the array
+            left = mergesort(arr[:mid])
             right = mergesort(arr[mid:])
             return combine(left, right)
         return mergesort(pieces_taken)
@@ -68,9 +66,9 @@ class Board():
         """
         for row in range(ROWS):
             for white in range(row % 2, COLUMNS, 2):
-                pygame.draw.rect(window, LIGHT_YELLOW, (row * CELL_SIZE, white * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(window, WHITE, (row * CELL_SIZE, white * CELL_SIZE, CELL_SIZE, CELL_SIZE))
             for black in range(row % 2 - 1, ROWS, 2):
-                pygame.draw.rect(window, GREEN, (row * CELL_SIZE, black * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(window, BLACK, (row * CELL_SIZE, black * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
     def add_pieces(self) -> None:
         """
@@ -83,7 +81,7 @@ class Board():
             for col in range(COLUMNS):
                 if col % 2 == ((row + 1) % 2):
                     if row < 3:
-                        self.board[row].append(Piece(row, col, WHITE))
+                        self.board[row].append(Piece(row, col, WHITE    ))
                     elif row > 4:
                         self.board[row].append(Piece(row, col, RED))
                     else:
@@ -379,7 +377,7 @@ class Board():
             button_width, button_height = 150, 50
             win_notification = pygame.Rect(popup_x + 150, popup_y + 50, button_width, button_height)
 
-            font = pygame.font.SysFont('arial', 24)
+            font = pygame.font.SysFont('arial', 15)
             message_surface = font.render(f'{winner.upper()} won!', True, (0, 0, 0))
             restart_surface = font.render(f'Restart', True, (0, 0, 0))
         

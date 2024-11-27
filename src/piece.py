@@ -7,7 +7,7 @@ class Piece:
         self.row = row
         self.column = column
         self.color = color
-        self.king = False  # Used to check if the piece was promoted
+        self.king = True  # Used to check if the piece was promoted
 
         # Assign player and direction based on color
         if self.color == RED:
@@ -44,7 +44,7 @@ class Piece:
         pygame.draw.circle(win, BLACK, (self.x, self.y), radius - 8)
         pygame.draw.circle(win, self.color, (self.x, self.y), radius - 10)
         if self.king:
-            pygame.draw.circle(win, LIGHT_BLUE, (self.x, self.y), radius - 12, 3)
+            pygame.draw.circle(win, GOLD, (self.x, self.y), radius - 12, 3)
 
     def king_promotion(self):
         """

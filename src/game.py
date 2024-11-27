@@ -4,6 +4,9 @@ from constants import *
 from lower_section import LowerSection, Button
 import copy
 
+# This file defines a Game class for a checkers game, 
+# handling game initialization, piece selection, movement, turn management, 
+# and undo/redo functionality using stacks to store and manage the game state.
 class Game():
     def __init__(self, window):
         self.window = window
@@ -75,7 +78,6 @@ class Game():
             print("No moves to redo!")
 
     def move_piece(self, new_row, new_col):
-        #CHECK IF TWO POSSIBLE MOVEMENTS TO THE SAME PLACE
         """
         Move a piece and save the new board state.
         Runtime Complexity:

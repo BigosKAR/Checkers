@@ -1,11 +1,12 @@
 import pygame
 from constants import *
 
-
+# File is for button initialization, coordinates, point (0,0) is in the upper left corner
 # Class used for buttons in the lower section
 class Button():
     def __init__(self, color, x,y,width,height, text=''):
         self.color = color
+        # self.x, self.y describe the upper left corner coordinates of the button
         self.x = x
         self.y = y
         self.width = width
