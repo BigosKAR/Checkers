@@ -7,7 +7,7 @@ class Piece:
         self.row = row
         self.column = column
         self.color = color
-        self.king = True  # Used to check if the piece was promoted
+        self.king = False  # Used to check if the piece was promoted
 
         # Assign player and direction based on color
         if self.color == RED:
