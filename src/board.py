@@ -265,7 +265,7 @@ class Board():
         - add_node: it adds a singular node to the tree but then also checks for every possibility in the next branches. So it is a recursion with two functions
 
         Runtime Complexity:
-        - Average Case = Worst Case: O(depth*possible_directions^depth)
+        - Average Case = Worst Case: O(possible_directions^depth)
         """
         possible_directions = ALL_DIRECTIONS if self.selected_piece.king else [d for d in ALL_DIRECTIONS if d[0] == self.selected_piece.direction]
         move_tree_root = TreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
