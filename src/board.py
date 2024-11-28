@@ -416,7 +416,7 @@ class Board():
             unlike the previous generate_valid_moves function which had 2 directions maximum.
 
             Runtime Complexity:
-            - Average Case = Worst Case: O(depth*possible_directions^depth)
+            - Average Case = Worst Case: O(possible_directions^depth)
             """
             king_root = KingTreeNode(coords=(self.selected_piece.row, self.selected_piece.column))
             max_depth = 12
